@@ -1,7 +1,5 @@
 package com.sonicether.soundphysics;
 
-import org.lwjgl.openal.EFX10;
-
 public class ReverbParams 
 {
 	public float decayTime;				// min: 0.1f 	max: 10.0f

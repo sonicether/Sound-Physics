@@ -463,13 +463,11 @@ public class SoundPhysicsCore implements IClassTransformer
 		
 		
 		//Now we loop over all of the methods declared inside the class until we get to the target method name
-		@SuppressWarnings("unchecked")
 		Iterator<MethodNode> methods = classNode.methods.iterator();
 		while(methods.hasNext())
 		{
 			MethodNode m = methods.next();
 			log("********* Method Name: " + m.name + " Desc: " + m.desc);
-			int targetIndex = -1;
 			
 			//Check if this is the method name and the signature matches
 			if (m.name.equals(targetMethodName) && m.desc.equals(targetMethodSignature))
@@ -479,15 +477,12 @@ public class SoundPhysicsCore implements IClassTransformer
 				AbstractInsnNode currentNode = null;
 				AbstractInsnNode targetNode = null;
 				
-				@SuppressWarnings("unchecked")
 				Iterator<AbstractInsnNode> iter = m.instructions.iterator();
 				
-				int index = -1;
 				
 				//Loop over the instruction set
 				while (iter.hasNext())
 				{
-					index++;
 					currentNode = iter.next();
 					
 					if (currentNode.getOpcode() == targetNodeOpcode)
@@ -504,7 +499,6 @@ public class SoundPhysicsCore implements IClassTransformer
 									{
 										log("Found target method invocation for injection: " + targetInvocationMethodName);
 										targetNode = currentNode;
-										targetIndex = index;
 									}
 									
 								}
@@ -516,7 +510,6 @@ public class SoundPhysicsCore implements IClassTransformer
 							{
 								log("Found target node for injection: " + targetNodeOpcode);
 								targetNode = currentNode;
-								targetIndex = index;
 							}
 						}
 						

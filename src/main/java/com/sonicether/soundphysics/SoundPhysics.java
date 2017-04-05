@@ -1,8 +1,11 @@
 package com.sonicether.soundphysics;
 
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
+import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALCcontext;
+import org.lwjgl.openal.ALCdevice;
+import org.lwjgl.openal.EFX10;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -21,14 +24,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-
-import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.AL11;
-import org.lwjgl.openal.ALC10;
-import org.lwjgl.openal.ALCcontext;
-import org.lwjgl.openal.ALCdevice;
-import org.lwjgl.openal.EFX10;
-
 import paulscode.sound.SoundSystemConfig;
 
 public class SoundPhysics 
@@ -91,16 +86,6 @@ public class SoundPhysics
 	}
 	
 	
-	private static int alcGetInt(ALCdevice device, int pname)
-	{
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4);
-		IntBuffer intBuffer = byteBuffer.asIntBuffer();
-		
-		//ALC10.alcGetInteger(device, pname, intBuffer);
-		
-		return intBuffer.get(0);
-	}
-
 	private static void setupEFX()
 	{
 		//Get current context and device
@@ -377,9 +362,7 @@ public class SoundPhysics
 			  playerPos = new Vec3d(playerPos.xCoord, playerPos.yCoord + mc.player.getEyeHeight(), playerPos.zCoord);
 		
 		soundPos = offsetSoundByName(soundPos, playerPos, lastSoundName, lastSoundCategory.getName());
-		
-		float soundDistance = (float)soundPos.distanceTo(playerPos);
-		
+				
 		//Vec3d toPlayerVector = soundPos.subtract(playerPos).normalize();
 		Vec3d toPlayerVector = playerPos.subtract(soundPos).normalize();
 		
@@ -395,9 +378,6 @@ public class SoundPhysics
 		
 		
 		boolean thisHitSolid = false;	//TODO: This will be true if the sound doesn't come from inside a block!
-		boolean firstHit = true;
-		Vec3d solidEntryPoint = new Vec3d(0.0, 0.0, 0.0);
-		int numOcclusionHits = 0;
 		
 		float occlusionAccumulation = 0.0f;
 		
@@ -408,7 +388,6 @@ public class SoundPhysics
 			//If we hit a block
 			if (rayHit != null)
 			{	
-				numOcclusionHits++;
 				//Get the normal of the side hit
 				//Vec3d hitNormal = getNormalFromFacing(rayHit.sideHit);
 				
@@ -448,7 +427,6 @@ public class SoundPhysics
 				//cutoff = 0.05f;
 				
 				thisHitSolid = !thisHitSolid;
-				firstHit = false;
 			}
 			else
 			{
@@ -495,17 +473,9 @@ public class SoundPhysics
 		
 		final int numRays = SoundPhysicsCore.Config.environmentEvaluationRays;
 		final int rayBounces = 4;
-		float reflectionEnergySum = 0.0f;
-		float rayLengthSum = 0.0f;
-		int numRaysHit = 0;
-		
-		int secondaryRayHits = 0;
-		float secondaryRayLengthSum = 0.0f;
-		float secondaryReflectionEnergySum = 0.0f;
 		
 		int[] rayHits = new int[rayBounces];
 		
-		float totalReflectivityRatio = 0.0f;
 		float[] bounceReflectivityRatio = new float[rayBounces];
 		
 		float sharedAirspace = 0.0f;
@@ -544,9 +514,6 @@ public class SoundPhysics
 			if (rayHit != null)
 			{
 				double rayLength = soundPos.distanceTo(rayHit.hitVec);
-				rayLengthSum += (float)rayLength;
-				reflectionEnergySum += 1.0f / numRays;
-				numRaysHit++;
 				
 				//Additional bounces
 				Int3 lastHitBlock = Int3.create(rayHit.getBlockPos().getX(), rayHit.getBlockPos().getY(), rayHit.getBlockPos().getZ());
@@ -561,7 +528,6 @@ public class SoundPhysics
 				//Secondary ray bounces
 				for (int j = 0; j < rayBounces; j++)
 				{
-					float fj = (float)j / rayBounces;
 					Vec3d newRayDir = reflect(lastRayDir, lastHitNormal);
 					//Vec3d newRayDir = lastHitNormal;
 					Vec3d newRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01, lastHitPos.yCoord + lastHitNormal.yCoord * 0.01, lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
@@ -571,7 +537,6 @@ public class SoundPhysics
 					
 					RayTraceResult newRayHit = mc.world.rayTraceBlocks(newRayStart, newRayEnd, true);
 					
-					float soundDirToPlayerDot = (float)newRayDir.dotProduct(toPlayerVector);
 					//float energyTowardsPlayer = (float)Math.pow(MathHelper.clamp_float(soundDirToPlayerDot, 0.0f, 1.0f), 1.0f);
 					float energyTowardsPlayer = 0.25f;
 					float blockReflectivity = getBlockReflectivity(lastHitBlock);
@@ -579,7 +544,6 @@ public class SoundPhysics
 					float bounceToPlayerDistance = (float)lastHitPos.distanceTo(playerPos);
 					//energyTowardsPlayer *= 1.0f / ((float)Math.pow(bounceToPlayerDistance, 2.0) + 0.01f);
 					
-					totalReflectivityRatio += blockReflectivity;
 					
 					if (newRayHit != null)
 					{
@@ -590,9 +554,6 @@ public class SoundPhysics
 						}
 						
 						double newRayLength = lastHitPos.distanceTo(newRayHit.hitVec);
-						secondaryRayLengthSum += newRayLength;
-						secondaryReflectionEnergySum = 0.0f;
-						secondaryRayHits++;
 						rayHits[j]++;
 						bounceReflectivityRatio[j] += (float)Math.pow(blockReflectivity, reflectionEnergyCurve);
 						
@@ -607,7 +568,6 @@ public class SoundPhysics
 						//Cast one final ray towards the player. If it's unobstructed, then the sound source and the player share airspace.
 						if (SoundPhysicsCore.Config.simplerSharedAirspaceSimulation && j == rayBounces-1 || !SoundPhysicsCore.Config.simplerSharedAirspaceSimulation)
 						{
-							Vec3d finalHitToPlayer = playerPos.subtract(lastHitPos).normalize();
 							Vec3d finalRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01, lastHitPos.yCoord + lastHitNormal.yCoord * 0.01, lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
 							
 							RayTraceResult finalRayHit = mc.world.rayTraceBlocks(finalRayStart, playerPos, true);
@@ -653,19 +613,9 @@ public class SoundPhysics
 			
 		}
 		
-		totalReflectivityRatio /= numRays * rayBounces;
 		
 		//log("total reflectivity ratio: " + totalReflectivityRatio);
 		
-		float rayHitRatio = (float)numRaysHit/(float)numRays;
-		float avgRayLength = rayLengthSum / (float)numRaysHit;
-		float avgSecondaryLength = secondaryRayHits != 0 ? secondaryRayLengthSum / secondaryRayHits : 0.0f;
-		float secondaryHitRatio = (float)secondaryRayHits/(float)(numRays * rayBounces);
-		
-		float hitRatioBounce1 = (float)rayHits[0] / (float)numRays;
-		float hitRatioBounce2 = (float)rayHits[1] / (float)numRays;
-		float hitRatioBounce3 = (float)rayHits[2] / (float)numRays;
-		float hitRatioBounce4 = (float)rayHits[3] / (float)numRays;
 		
 		bounceReflectivityRatio[0] = (float)Math.pow(bounceReflectivityRatio[0] / (float)numRays, 1.0 / reflectionEnergyCurve);
 		bounceReflectivityRatio[1] = (float)Math.pow(bounceReflectivityRatio[1] / (float)numRays, 1.0 / reflectionEnergyCurve);
@@ -821,26 +771,6 @@ public class SoundPhysics
 	}
 	
 	
-	private static float calculateAttenuation(double x, double y, double z)
-	{
-		if (SoundPhysics.mc.player != null)
-		{
-			Vec3d playerPos = SoundPhysics.mc.player.getPositionVector();
-			
-			double soundDistance = playerPos.distanceTo(new Vec3d(x, y, z));
-						
-			float atten = (float)Math.max(1.0 - soundDistance / 16.0, 0.0f);		
-
-			//logDetailed("Sound attenuation: " + atten);
-			
-			return atten;
-		}
-		else
-		{
-			//System.out.println("NULL PLAYER");
-			return 1.0f;
-		}		
-	}
 	
 	
 	/**
