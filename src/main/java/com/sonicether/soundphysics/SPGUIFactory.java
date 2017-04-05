@@ -6,14 +6,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 
-
-public class SPGUIFactory implements IModGuiFactory
-{
+public class SPGUIFactory implements IModGuiFactory {
 
 	@Override
-	public void initialize(Minecraft minecraftInstance) {
+	public void initialize(final Minecraft minecraftInstance) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -28,8 +26,7 @@ public class SPGUIFactory implements IModGuiFactory
 	}
 
 	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(
-			RuntimeOptionCategoryElement element) {
+	public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
 		// TODO Auto-generated method stub
 		return null;
 	}
