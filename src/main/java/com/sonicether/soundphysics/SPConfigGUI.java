@@ -12,13 +12,14 @@ import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 
 public class SPConfigGUI extends GuiConfig {
+
 	public SPConfigGUI(final GuiScreen parent) {
 		super(parent, getConfigElements(), SoundPhysicsCore.modid, false, false, "Sound Physics Configuration");
 	}
 
 	/** Compiles a list of config elements */
 	private static List<IConfigElement> getConfigElements() {
-		final List<IConfigElement> list = new ArrayList<>();
+		final ArrayList<IConfigElement> list = new ArrayList<IConfigElement>();
 
 		// Add categories to config GUI
 		list.add(categoryElement(Configuration.CATEGORY_GENERAL, "General", "soundphysics.configgui.ctgy.general"));
@@ -39,4 +40,5 @@ public class SPConfigGUI extends GuiConfig {
 		return new DummyConfigElement.DummyCategoryElement(name, tooltip_key,
 				new ConfigElement(SoundPhysicsCore.configFile.getCategory(category)).getChildElements());
 	}
+
 }
