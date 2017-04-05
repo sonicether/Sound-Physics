@@ -27,7 +27,7 @@ import net.minecraft.util.math.Vec3i;
 import paulscode.sound.SoundSystemConfig;
 
 public class SoundPhysics {
-	// Private fields
+
 	private static final String logPrefix = "[SOUND PHYSICS]";
 	private static int auxFXSlot0;
 	private static int auxFXSlot1;
@@ -48,7 +48,6 @@ public class SoundPhysics {
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
 
-	// Public fields
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
 	public static float globalRolloffFactor = SoundPhysicsCore.Config.rolloffFactor;
 	public static float globalVolumeMultiplier = 4.0f;
@@ -67,58 +66,12 @@ public class SoundPhysics {
 		soundDistanceAllowance = SoundPhysicsCore.Config.soundDistanceAllowance;
 
 		if (auxFXSlot0 != 0) {
-			setReverbParams(ReverbParams.getReverb0(), auxFXSlot0, reverb0); // Set
-																				// the
-																				// global
-																				// reverb
-																				// parameters
-																				// and
-																				// apply
-																				// them
-																				// to
-																				// the
-																				// effect
-																				// and
-																				// effectslot
-			setReverbParams(ReverbParams.getReverb1(), auxFXSlot1, reverb1); // Set
-																				// the
-																				// global
-																				// reverb
-																				// parameters
-																				// and
-																				// apply
-																				// them
-																				// to
-																				// the
-																				// effect
-																				// and
-																				// effectslot
-			setReverbParams(ReverbParams.getReverb2(), auxFXSlot2, reverb2); // Set
-																				// the
-																				// global
-																				// reverb
-																				// parameters
-																				// and
-																				// apply
-																				// them
-																				// to
-																				// the
-																				// effect
-																				// and
-																				// effectslot
-			setReverbParams(ReverbParams.getReverb3(), auxFXSlot3, reverb3); // Set
-																				// the
-																				// global
-																				// reverb
-																				// parameters
-																				// and
-																				// apply
-																				// them
-																				// to
-																				// the
-																				// effect
-																				// and
-																				// effectslot
+			// Set the global reverb parameters and apply them to the effect and
+			// effectslot
+			setReverbParams(ReverbParams.getReverb0(), auxFXSlot0, reverb0);
+			setReverbParams(ReverbParams.getReverb1(), auxFXSlot1, reverb1);
+			setReverbParams(ReverbParams.getReverb2(), auxFXSlot2, reverb2);
+			setReverbParams(ReverbParams.getReverb3(), auxFXSlot3, reverb3);
 		}
 
 	}
@@ -153,38 +106,17 @@ public class SoundPhysics {
 		EFX10.alAuxiliaryEffectSloti(auxFXSlot3, EFX10.AL_EFFECTSLOT_AUXILIARY_SEND_AUTO, AL10.AL_TRUE);
 		checkErrorLog("Failed creating auxiliary effect slots!");
 
-		// Create effect objects
-		reverb0 = EFX10.alGenEffects(); // Create effect object
-		EFX10.alEffecti(reverb0, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB); // Set
-																					// effect
-																					// object
-																					// to
-																					// be
-																					// reverb
+		reverb0 = EFX10.alGenEffects();
+		EFX10.alEffecti(reverb0, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB);
 		checkErrorLog("Failed creating reverb effect slot 0!");
-		reverb1 = EFX10.alGenEffects(); // Create effect object
-		EFX10.alEffecti(reverb1, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB); // Set
-																					// effect
-																					// object
-																					// to
-																					// be
-																					// reverb
+		reverb1 = EFX10.alGenEffects();
+		EFX10.alEffecti(reverb1, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB);
 		checkErrorLog("Failed creating reverb effect slot 1!");
-		reverb2 = EFX10.alGenEffects(); // Create effect object
-		EFX10.alEffecti(reverb2, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB); // Set
-																					// effect
-																					// object
-																					// to
-																					// be
-																					// reverb
+		reverb2 = EFX10.alGenEffects();
+		EFX10.alEffecti(reverb2, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB);
 		checkErrorLog("Failed creating reverb effect slot 2!");
-		reverb3 = EFX10.alGenEffects(); // Create effect object
-		EFX10.alEffecti(reverb3, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB); // Set
-																					// effect
-																					// object
-																					// to
-																					// be
-																					// reverb
+		reverb3 = EFX10.alGenEffects();
+		EFX10.alEffecti(reverb3, EFX10.AL_EFFECT_TYPE, EFX10.AL_EFFECT_EAXREVERB);
 		checkErrorLog("Failed creating reverb effect slot 3!");
 
 		// Create filters
@@ -268,8 +200,8 @@ public class SoundPhysics {
 		// return 0.0;
 	}
 
-	private static float getBlockReflectivity(final Int3 blockPos) {
-		final Block block = mc.world.getBlockState(new BlockPos(blockPos.x, blockPos.y, blockPos.z)).getBlock();
+	private static float getBlockReflectivity(final BlockPos blockPos) {
+		final Block block = mc.world.getBlockState(blockPos).getBlock();
 		final SoundType soundType = block.getSoundType();
 
 		float reflectivity = 0.5f;
@@ -565,8 +497,7 @@ public class SoundPhysics {
 				final double rayLength = soundPos.distanceTo(rayHit.hitVec);
 
 				// Additional bounces
-				Int3 lastHitBlock = Int3.create(rayHit.getBlockPos().getX(), rayHit.getBlockPos().getY(),
-						rayHit.getBlockPos().getZ());
+				BlockPos lastHitBlock = rayHit.getBlockPos();
 				Vec3d lastHitPos = rayHit.hitVec;
 				Vec3d lastHitNormal = getNormalFromFacing(rayHit.sideHit);
 				Vec3d lastRayDir = rayDir;
@@ -615,8 +546,7 @@ public class SoundPhysics {
 						lastHitPos = newRayHit.hitVec;
 						lastHitNormal = getNormalFromFacing(newRayHit.sideHit);
 						lastRayDir = newRayDir;
-						lastHitBlock = Int3.create(newRayHit.getBlockPos().getX(), newRayHit.getBlockPos().getY(),
-								newRayHit.getBlockPos().getZ());
+						lastHitBlock = newRayHit.getBlockPos();
 
 						// Cast one final ray towards the player. If it's
 						// unobstructed, then the sound source and the player
