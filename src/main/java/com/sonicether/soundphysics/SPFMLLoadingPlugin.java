@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
 
 
-@MCVersion(value="1.11")
+@MCVersion(value="1.11.2")
 public class SPFMLLoadingPlugin implements IFMLLoadingPlugin, IFMLCallHook
 {
 
