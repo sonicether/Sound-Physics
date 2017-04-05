@@ -22,6 +22,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 //import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 //import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -35,8 +36,6 @@ public class SoundPhysicsCore implements IClassTransformer
 {
 	public static Configuration configFile;
 	
-	@Mod.Instance("soundphysics")
-	public static SoundPhysicsCore instance;
 	
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.0";
@@ -96,7 +95,7 @@ public class SoundPhysicsCore implements IClassTransformer
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event)
 	{
-		FMLCommonHandler.instance().bus().register(instance);
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
 	@SubscribeEvent
