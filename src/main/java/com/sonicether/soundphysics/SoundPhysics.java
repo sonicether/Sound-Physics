@@ -230,7 +230,7 @@ public class SoundPhysics
 	
 	private static float getBlockReflectivity(Int3 blockPos)
 	{
-		Block block = mc.theWorld.getBlockState(new BlockPos(blockPos.x, blockPos.y, blockPos.z)).getBlock();
+		Block block = mc.world.getBlockState(new BlockPos(blockPos.x, blockPos.y, blockPos.z)).getBlock();
 		SoundType soundType = block.getSoundType();
 		
 		float reflectivity = 0.5f;
@@ -355,10 +355,10 @@ public class SoundPhysics
 		}
 		
 		
-		if (mc.thePlayer == null)
+		if (mc.player == null)
 			return;
 		
-		if (mc.theWorld == null)
+		if (mc.world == null)
 			return;
 		
 		if (SoundPhysicsCore.Config.skipRainOcclusionTracing && lastSoundName.matches(".*rain.*"))
@@ -373,8 +373,8 @@ public class SoundPhysics
 		
 		//Direct sound occlusion
 		Vec3d soundPos = new Vec3d(posX, posY, posZ);
-		Vec3d playerPos = mc.thePlayer.getPositionVector();
-			  playerPos = new Vec3d(playerPos.xCoord, playerPos.yCoord + mc.thePlayer.getEyeHeight(), playerPos.zCoord);
+		Vec3d playerPos = mc.player.getPositionVector();
+			  playerPos = new Vec3d(playerPos.xCoord, playerPos.yCoord + mc.player.getEyeHeight(), playerPos.zCoord);
 		
 		soundPos = offsetSoundByName(soundPos, playerPos, lastSoundName, lastSoundCategory.getName());
 		
@@ -403,7 +403,7 @@ public class SoundPhysics
 		
 		for(int i = 0; i < 10; i++)
 		{
-			RayTraceResult rayHit = mc.theWorld.rayTraceBlocks(rayOrigin, playerPos, true);
+			RayTraceResult rayHit = mc.world.rayTraceBlocks(rayOrigin, playerPos, true);
 			
 			//If we hit a block
 			if (rayHit != null)
@@ -416,8 +416,8 @@ public class SoundPhysics
 				//int nextBlockPosY = (int)Math.floor(rayHit.hitVec.xCoord + toPlayerVector.xCoord * 0.001);
 				//int nextBlockPosZ = (int)Math.floor(rayHit.hitVec.xCoord + toPlayerVector.xCoord * 0.001);
 				
-				//Block blockHit = mc.theWorld.getBlock(rayHit.blockX, rayHit.blockY, rayHit.blockZ);
-				Block blockHit = mc.theWorld.getBlockState(rayHit.getBlockPos()).getBlock();
+				//Block blockHit = mc.world.getBlock(rayHit.blockX, rayHit.blockY, rayHit.blockZ);
+				Block blockHit = mc.world.getBlockState(rayHit.getBlockPos()).getBlock();
 				
 				float blockOcclusion = 1.0f;
 				
@@ -475,7 +475,7 @@ public class SoundPhysics
 		float sendCutoff3 = 1.0f;
 		
 		
-		if (mc.thePlayer.isInsideOfMaterial(Material.WATER))
+		if (mc.player.isInsideOfMaterial(Material.WATER))
 		{
 			directCutoff *= 1.0f - SoundPhysicsCore.Config.underwaterFilter;
 		}
@@ -539,7 +539,7 @@ public class SoundPhysics
 			
 			Vec3d rayEnd = new Vec3d(rayStart.xCoord + rayDir.xCoord * maxDistance, rayStart.yCoord + rayDir.yCoord * maxDistance, rayStart.zCoord + rayDir.zCoord * maxDistance);
 			
-			RayTraceResult rayHit = mc.theWorld.rayTraceBlocks(rayStart, rayEnd, true);
+			RayTraceResult rayHit = mc.world.rayTraceBlocks(rayStart, rayEnd, true);
 			
 			if (rayHit != null)
 			{
@@ -569,7 +569,7 @@ public class SoundPhysics
 					
 					//log("New ray dir: " + newRayDir.xCoord + ", " + newRayDir.yCoord + ", " + newRayDir.zCoord);
 					
-					RayTraceResult newRayHit = mc.theWorld.rayTraceBlocks(newRayStart, newRayEnd, true);
+					RayTraceResult newRayHit = mc.world.rayTraceBlocks(newRayStart, newRayEnd, true);
 					
 					float soundDirToPlayerDot = (float)newRayDir.dotProduct(toPlayerVector);
 					//float energyTowardsPlayer = (float)Math.pow(MathHelper.clamp_float(soundDirToPlayerDot, 0.0f, 1.0f), 1.0f);
@@ -610,7 +610,7 @@ public class SoundPhysics
 							Vec3d finalHitToPlayer = playerPos.subtract(lastHitPos).normalize();
 							Vec3d finalRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01, lastHitPos.yCoord + lastHitNormal.yCoord * 0.01, lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
 							
-							RayTraceResult finalRayHit = mc.theWorld.rayTraceBlocks(finalRayStart, playerPos, true);
+							RayTraceResult finalRayHit = mc.world.rayTraceBlocks(finalRayStart, playerPos, true);
 							
 							if (finalRayHit == null)
 							{
@@ -626,11 +626,11 @@ public class SoundPhysics
 					
 					float reflectionDelay = (float)Math.pow(Math.max(totalRayDistance, 0.0), 1.0) * 0.12f * blockReflectivity;
 					
-					float cross0 = 1.0f - MathHelper.clamp_float(Math.abs(reflectionDelay - 0.0f), 0.0f, 1.0f);
-					float cross1 = 1.0f - MathHelper.clamp_float(Math.abs(reflectionDelay - 1.0f), 0.0f, 1.0f);
-					float cross2 = 1.0f - MathHelper.clamp_float(Math.abs(reflectionDelay - 2.0f), 0.0f, 1.0f);
+					float cross0 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 0.0f), 0.0f, 1.0f);
+					float cross1 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 1.0f), 0.0f, 1.0f);
+					float cross2 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 2.0f), 0.0f, 1.0f);
 					//float cross3 = 1.0f - MathHelper.clamp_float(Math.abs(reflectionDelay - 3.0f), 0.0f, 1.0f);
-					float cross3 = MathHelper.clamp_float(reflectionDelay - 2.0f, 0.0f, 1.0f);
+					float cross3 = MathHelper.clamp(reflectionDelay - 2.0f, 0.0f, 1.0f);
 					
 /* 1.0 / numRays*/	sendGain0 += cross0 * energyTowardsPlayer * 6.4f * rcpTotalRays;
 					sendGain1 += cross1 * energyTowardsPlayer * 12.8f * rcpTotalRays;
@@ -644,7 +644,7 @@ public class SoundPhysics
 					}
 				}
 
-				//log("Hit " + mc.theWorld.getBlock(rayHit.blockX, rayHit.blockY, rayHit.blockZ).getUnlocalizedName() + " at " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord + ", " + rayHit.hitVec.zCoord + " and travelled " + rayLength + " meters.");
+				//log("Hit " + mc.world.getBlock(rayHit.blockX, rayHit.blockY, rayHit.blockZ).getUnlocalizedName() + " at " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord + ", " + rayHit.hitVec.zCoord + " and travelled " + rayLength + " meters.");
 			}
 			else
 			{
@@ -680,10 +680,10 @@ public class SoundPhysics
 		else
 			sharedAirspace *= rcpTotalRays;
 		
-		float sharedAirspaceWeight0 = MathHelper.clamp_float(sharedAirspace / 20.0f, 0.0f, 1.0f);
-		float sharedAirspaceWeight1 = MathHelper.clamp_float(sharedAirspace / 15.0f, 0.0f, 1.0f);
-		float sharedAirspaceWeight2 = MathHelper.clamp_float(sharedAirspace / 10.0f, 0.0f, 1.0f);
-		float sharedAirspaceWeight3 = MathHelper.clamp_float(sharedAirspace / 10.0f, 0.0f, 1.0f);
+		float sharedAirspaceWeight0 = MathHelper.clamp(sharedAirspace / 20.0f, 0.0f, 1.0f);
+		float sharedAirspaceWeight1 = MathHelper.clamp(sharedAirspace / 15.0f, 0.0f, 1.0f);
+		float sharedAirspaceWeight2 = MathHelper.clamp(sharedAirspace / 10.0f, 0.0f, 1.0f);
+		float sharedAirspaceWeight3 = MathHelper.clamp(sharedAirspace / 10.0f, 0.0f, 1.0f);
 		
 		
 		sendCutoff0 = (float)Math.exp(-occlusionAccumulation * absorptionCoeff * 1.0f) * (1.0f - sharedAirspaceWeight0) + sharedAirspaceWeight0;
@@ -726,10 +726,10 @@ public class SoundPhysics
 		sendGain3 *= (float)Math.pow(hitRatioBounce4, 4.0);
 		*/
 		
-		sendGain0 = MathHelper.clamp_float(sendGain0 * 1.00f - 0.00f, 0.0f, 1.0f);
-		sendGain1 = MathHelper.clamp_float(sendGain1 * 1.00f - 0.00f, 0.0f, 1.0f);
-		sendGain2 = MathHelper.clamp_float(sendGain2 * 1.05f - 0.05f, 0.0f, 1.0f);
-		sendGain3 = MathHelper.clamp_float(sendGain3 * 1.05f - 0.05f, 0.0f, 1.0f);
+		sendGain0 = MathHelper.clamp(sendGain0 * 1.00f - 0.00f, 0.0f, 1.0f);
+		sendGain1 = MathHelper.clamp(sendGain1 * 1.00f - 0.00f, 0.0f, 1.0f);
+		sendGain2 = MathHelper.clamp(sendGain2 * 1.05f - 0.05f, 0.0f, 1.0f);
+		sendGain3 = MathHelper.clamp(sendGain3 * 1.05f - 0.05f, 0.0f, 1.0f);
 		
 		
 		sendGain0 *= (float)Math.pow(sendCutoff0, 0.1);
@@ -751,7 +751,7 @@ public class SoundPhysics
 		//sendGain2 = 0.0f;
 		//sendGain3 = 0.0f;
 		
-		if (mc.thePlayer.isInWater())
+		if (mc.player.isInWater())
 		{
 			sendCutoff0 *= 0.4f;
 			sendCutoff1 *= 0.4f;
@@ -823,9 +823,9 @@ public class SoundPhysics
 	
 	private static float calculateAttenuation(double x, double y, double z)
 	{
-		if (SoundPhysics.mc.thePlayer != null)
+		if (SoundPhysics.mc.player != null)
 		{
-			Vec3d playerPos = SoundPhysics.mc.thePlayer.getPositionVector();
+			Vec3d playerPos = SoundPhysics.mc.player.getPositionVector();
 			
 			double soundDistance = playerPos.distanceTo(new Vec3d(x, y, z));
 						
@@ -957,7 +957,7 @@ public class SoundPhysics
 	//TODO: Find fancy way of determining if a sound is going to be sufficiently quiet to not play it.
 	public static boolean shouldSoundPacketBeSent(double posX, double posY, double posZ, double volume) 
 	{
-		if (mc.thePlayer != null)
+		if (mc.player != null)
 		{
 			double distance = getDistanceFromPlayer(posX, posY, posZ);
 			return distance < 32.0;
@@ -967,9 +967,9 @@ public class SoundPhysics
 	
 	private static double getDistanceFromPlayer(double posX, double posY, double posZ)
 	{
-		double x = mc.thePlayer.posX - posX;
-		double y = mc.thePlayer.posY - posY;
-		double z = mc.thePlayer.posZ - posZ;
+		double x = mc.player.posX - posX;
+		double y = mc.player.posY - posY;
+		double z = mc.player.posZ - posZ;
 		
 		x *= x;
 		y *= y;
