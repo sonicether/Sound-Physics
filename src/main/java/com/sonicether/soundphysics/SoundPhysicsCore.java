@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -31,6 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod(modid = SoundPhysicsCore.modid, version = SoundPhysicsCore.version, guiFactory = "com.sonicether.soundphysics.SPGUIFactory")
 public class SoundPhysicsCore implements IClassTransformer {
+
 	public static Configuration configFile;
 
 	public static final String modid = "soundphysics";
@@ -173,124 +175,142 @@ public class SoundPhysicsCore implements IClassTransformer {
 		System.out.println(message);
 	}
 
-	// arg0: class name, arg1: new name of the class, arg2: chuck of bytecode
-	// that's about to be loaded into JVM
 	@Override
-	public byte[] transform(final String paramString1, final String paramString2, byte[] paramArrayOfByte) {
-		InsnList localInsnList1 = new InsnList();
-		localInsnList1.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "init", "()V"));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
+	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
+		InsnList toInject = new InsnList();
+		InsnList helperList2 = new InsnList();
+
+		// SoundPhysics.init() in SoundManager.SoundSystemStarterThread
+		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "init", "()V",
+				false));
+		bytes = patchMethodInClass(obfuscated, bytes,
 				new String[] { "net.minecraft.client.audio.SoundManager$SoundSystemStarterThread", "ccq$a" },
 				new String[] { "<init>", "<init>" },
-				new String[] { "(Lnet/minecraft/client/audio/SoundManager;)V", "(Lccq;)V" }, 183, 5,
-				new String[] { "<init>", "<init>" }, null, new InsnList[] { localInsnList1, localInsnList1 }, false, 0,
-				0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1.add(new VarInsnNode(25, 7));
-		localInsnList1.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "setLastSoundCategory",
-				"(Lnet/minecraft/util/SoundCategory;)V"));
-		InsnList localInsnList2 = new InsnList();
-		localInsnList2.add(new VarInsnNode(25, 7));
-		localInsnList2.add(
-				new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "setLastSoundCategory", "(Lno;)V"));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "net.minecraft.client.audio.SoundManager", "ccq" }, new String[] { "playSound", "c" },
-				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, 182, 5,
-				new String[] { "setVolume", "setVolume" }, null, new InsnList[] { localInsnList1, localInsnList2 },
+				new String[] { "(Lnet/minecraft/client/audio/SoundManager;)V", "(Lccq;)V" }, Opcodes.INVOKESPECIAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "<init>", "<init>" }, null,
+				new InsnList[] { toInject, toInject }, false, 0, 0, false, 0);
+
+		// setLastSoundCategory(var6) in SoundManager.playSound()
+		toInject = new InsnList();
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 7));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"setLastSoundCategory", "(Lnet/minecraft/util/SoundCategory;)V", false));
+		helperList2.add(new VarInsnNode(Opcodes.ALOAD, 7));
+		helperList2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"setLastSoundCategory", "(Lno;)V", false));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "net.minecraft.client.audio.SoundManager", "ccq" },
+				new String[] { "playSound", "c" },
+				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, Opcodes.INVOKEVIRTUAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "setVolume", "setVolume" }, null,
+				new InsnList[] { toInject, helperList2 }, false, 0, 0, false, 0);
+
+		// setLastSoundName(name) in SoundManager.playSound()
+		toInject = new InsnList();
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "net/minecraft/client/audio/ISound",
+				"getSoundLocation", "()Lnet/minecraft/util/ResourceLocation;", true));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/util/ResourceLocation", "toString",
+				"()Ljava/lang/String;", false));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"setLastSoundName", "(Ljava/lang/String;)V", false));
+		helperList2 = new InsnList();
+		helperList2.add(new VarInsnNode(25, 1));
+		helperList2.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "ccc", "a", "()Lkq;", true));
+		helperList2.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "kq", "toString", "()Ljava/lang/String;", false));
+		helperList2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"setLastSoundName", "(Ljava/lang/String;)V", false));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "net.minecraft.client.audio.SoundManager", "ccq" },
+				new String[] { "playSound", "c" },
+				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, Opcodes.INVOKEVIRTUAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "setVolume", "setVolume" }, null,
+				new InsnList[] { toInject, helperList2 }, false, 0, 0, false, 0);
+
+		// Global volume multiplier
+		toInject = new InsnList();
+		toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"globalVolumeMultiplier", "F"));
+		toInject.add(new InsnNode(Opcodes.FMUL));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "net.minecraft.client.audio.SoundManager", "ccq" },
+				new String[] { "playSound", "c" },
+				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, Opcodes.INVOKESPECIAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "getClampedVolume", "e" },
+				new String[] { "(Lnet/minecraft/client/audio/ISound;)F", "(Lccc;)F" }, new InsnList[] { toInject },
 				false, 0, 0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1.add(new VarInsnNode(25, 1));
-		localInsnList1.add(new MethodInsnNode(185, "net/minecraft/client/audio/ISound", "getSoundLocation",
-				"()Lnet/minecraft/util/ResourceLocation;"));
-		localInsnList1.add(
-				new MethodInsnNode(182, "net/minecraft/util/ResourceLocation", "toString", "()Ljava/lang/String;"));
-		localInsnList1.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "setLastSoundName",
-				"(Ljava/lang/String;)V"));
-		localInsnList2 = new InsnList();
-		localInsnList2.add(new VarInsnNode(25, 1));
-		localInsnList2.add(new MethodInsnNode(185, "ccc", "a", "()Lkq;"));
-		localInsnList2.add(new MethodInsnNode(182, "kq", "toString", "()Ljava/lang/String;"));
-		localInsnList2.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "setLastSoundName",
-				"(Ljava/lang/String;)V"));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "net.minecraft.client.audio.SoundManager", "ccq" }, new String[] { "playSound", "c" },
-				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, 182, 5,
-				new String[] { "setVolume", "setVolume" }, null, new InsnList[] { localInsnList1, localInsnList2 },
-				false, 0, 0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1
-				.add(new FieldInsnNode(178, "com/sonicether/soundphysics/SoundPhysics", "globalVolumeMultiplier", "F"));
-		localInsnList1.add(new InsnNode(106));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "net.minecraft.client.audio.SoundManager", "ccq" }, new String[] { "playSound", "c" },
-				new String[] { "(Lnet/minecraft/client/audio/ISound;)V", "(Lccc;)V" }, 183, 5,
-				new String[] { "getClampedVolume", "e" },
-				new String[] { "(Lnet/minecraft/client/audio/ISound;)F", "(Lccc;)F" },
-				new InsnList[] { localInsnList1 }, false, 0, 0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1.add(new VarInsnNode(25, 0));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
+
+		// onPlaySound(var6) in paulscode.libraries.SourceLWJGLOpenAL.play()
+		toInject = new InsnList();
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
 				"Lpaulscode/sound/Vector3D;"));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/Vector3D", "x", "F"));
-		localInsnList1.add(new VarInsnNode(25, 0));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/Vector3D", "x", "F"));
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
 				"Lpaulscode/sound/Vector3D;"));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/Vector3D", "y", "F"));
-		localInsnList1.add(new VarInsnNode(25, 0));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/Vector3D", "y", "F"));
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/libraries/SourceLWJGLOpenAL", "position",
 				"Lpaulscode/sound/Vector3D;"));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/Vector3D", "z", "F"));
-		localInsnList1.add(new VarInsnNode(25, 0));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/libraries/SourceLWJGLOpenAL", "channelOpenAL",
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/Vector3D", "z", "F"));
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/libraries/SourceLWJGLOpenAL", "channelOpenAL",
 				"Lpaulscode/sound/libraries/ChannelLWJGLOpenAL;"));
-		localInsnList1.add(new FieldInsnNode(180, "paulscode/sound/libraries/ChannelLWJGLOpenAL", "ALSource",
+		toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "paulscode/sound/libraries/ChannelLWJGLOpenAL", "ALSource",
 				"Ljava/nio/IntBuffer;"));
-		localInsnList1.add(new InsnNode(3));
-		localInsnList1.add(new MethodInsnNode(182, "java/nio/IntBuffer", "get", "(I)I", false));
-		localInsnList1.add(
-				new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "onPlaySound", "(FFFI)V", false));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "paulscode.sound.libraries.SourceLWJGLOpenAL" }, new String[] { "play" },
-				new String[] { "(Lpaulscode/sound/Channel;)V" }, 182, 5, new String[] { "play" }, null,
-				new InsnList[] { localInsnList1 }, false, 0, 0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1.add(new FieldInsnNode(178, "com/sonicether/soundphysics/SoundPhysics", "attenuationModel", "I"));
-		localInsnList1
-				.add(new FieldInsnNode(178, "com/sonicether/soundphysics/SoundPhysics", "globalRolloffFactor", "F"));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "paulscode.sound.SoundSystem" }, new String[] { "newSource" },
-				new String[] { "(ZLjava/lang/String;Ljava/net/URL;Ljava/lang/String;ZFFFIF)V" }, 183, 5,
-				new String[] { "<init>" }, null, new InsnList[] { localInsnList1 }, true, 2, 0, false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1
-				.add(new FieldInsnNode(178, "com/sonicether/soundphysics/SoundPhysics", "soundDistanceAllowance", "D"));
-		localInsnList1.add(new InsnNode(107));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
+		toInject.add(new InsnNode(Opcodes.ICONST_0));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/IntBuffer", "get", "(I)I", false));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "onPlaySound",
+				"(FFFI)V", false));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "paulscode.sound.libraries.SourceLWJGLOpenAL" },
+				new String[] { "play" }, new String[] { "(Lpaulscode/sound/Channel;)V" }, Opcodes.INVOKEVIRTUAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "play" }, null, new InsnList[] { toInject }, false, 0, 0,
+				false, 0);
+
+		// attenuation model and rolloff factor
+		toInject = new InsnList();
+		toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"attenuationModel", "I"));
+		toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"globalRolloffFactor", "F"));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "paulscode.sound.SoundSystem" },
+				new String[] { "newSource" },
+				new String[] { "(ZLjava/lang/String;Ljava/net/URL;Ljava/lang/String;ZFFFIF)V" }, Opcodes.INVOKESPECIAL,
+				AbstractInsnNode.METHOD_INSN, new String[] { "<init>" }, null, new InsnList[] { toInject }, true, 2, 0,
+				false, 0);
+
+		// Multiply sound distance volume play decision by
+		// SoundPhysics.soundDistanceAllowance
+		toInject = new InsnList();
+		toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"soundDistanceAllowance", "D"));
+		toInject.add(new InsnNode(Opcodes.DMUL));
+		bytes = patchMethodInClass(obfuscated, bytes,
 				new String[] { "net.minecraft.server.management.PlayerList", "mt" },
 				new String[] { "sendToAllNearExcept", "a" },
 				new String[] { "(Lnet/minecraft/entity/player/EntityPlayer;DDDDILnet/minecraft/network/Packet;)V",
 						"(Laay;DDDDILfm;)V" },
-				152, 0, new String[] { "", "" }, new String[] { "", "" }, new InsnList[] { localInsnList1 }, true, 0, 0,
-				false, 0);
-		localInsnList1 = new InsnList();
-		localInsnList1.add(new VarInsnNode(25, 1));
-		localInsnList1
-				.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics", "calculateEntitySoundOffset",
-						"(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/SoundEvent;)D", false));
-		localInsnList1.add(new InsnNode(99));
-		localInsnList1.add(new VarInsnNode(25, 0));
-		localInsnList2 = new InsnList();
-		localInsnList2.add(new VarInsnNode(25, 1));
-		localInsnList2.add(new MethodInsnNode(184, "com/sonicether/soundphysics/SoundPhysics",
+				Opcodes.DCMPG, AbstractInsnNode.INSN, new String[] { "", "" }, new String[] { "", "" },
+				new InsnList[] { toInject }, true, 0, 0, false, 0);
+
+		// Offset entity sound by their eye height
+		toInject = new InsnList();
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+				"calculateEntitySoundOffset", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/SoundEvent;)D",
+				false));
+		toInject.add(new InsnNode(Opcodes.DADD));
+		toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		helperList2 = new InsnList();
+		helperList2.add(new VarInsnNode(Opcodes.ALOAD, 1));
+		helperList2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 				"calculateEntitySoundOffset", "(Lsn;Lnm;)D", false));
-		localInsnList2.add(new InsnNode(99));
-		localInsnList2.add(new VarInsnNode(25, 0));
-		paramArrayOfByte = patchMethodInClass(paramString1, paramArrayOfByte,
-				new String[] { "net.minecraft.entity.Entity", "sn" }, new String[] { "playSound", "a" },
-				new String[] { "(Lnet/minecraft/util/SoundEvent;FF)V", "(Lnm;FF)V" }, 182, 5,
-				new String[] { "getSoundCategory", "bC" }, null, new InsnList[] { localInsnList1, localInsnList2 },
-				true, 0, 0, false, -3);
-		return paramArrayOfByte;
+		helperList2.add(new InsnNode(Opcodes.DADD));
+		helperList2.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		bytes = patchMethodInClass(obfuscated, bytes, new String[] { "net.minecraft.entity.Entity", "sn" },
+				new String[] { "playSound", "a" }, new String[] { "(Lnet/minecraft/util/SoundEvent;FF)V", "(Lnm;FF)V" },
+				Opcodes.INVOKEVIRTUAL, AbstractInsnNode.METHOD_INSN, new String[] { "getSoundCategory", "bC" }, null,
+				new InsnList[] { toInject, helperList2 }, true, 0, 0, false, -3);
+
+		return bytes;
 	}
 
 	/**

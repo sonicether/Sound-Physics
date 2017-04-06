@@ -1,6 +1,7 @@
 package com.sonicether.soundphysics;
 
 public class ReverbParams {
+
 	public float decayTime; // min: 0.1f max: 10.0f
 	public float density; // min: 0.0f max: 1.0f
 	public float diffusion; // min: 0.0f max: 1.0f
@@ -86,7 +87,4 @@ public class ReverbParams {
 		return r;
 	}
 
-	ReverbParams() {
-
-	}
 }

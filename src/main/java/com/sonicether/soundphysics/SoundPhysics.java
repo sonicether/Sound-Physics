@@ -12,10 +12,6 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-//import net.minecraft.client.audio.SoundCategory;
-//import net.minecraft.util.MathHelper;
-//import net.minecraft.util.MovingObjectPosition;
-//import net.minecraft.util.Vec3d;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -54,6 +50,9 @@ public class SoundPhysics {
 	public static float globalReverbMultiplier = 0.7f * SoundPhysicsCore.Config.globalReverbGain;
 	public static double soundDistanceAllowance = SoundPhysicsCore.Config.soundDistanceAllowance;
 
+	/**
+	 * CALLED BY ASM!
+	 */
 	public static void init() {
 		log("Initializing Sound Physics...");
 		setupEFX();
@@ -152,16 +151,25 @@ public class SoundPhysics {
 		// effectslot
 	}
 
+	/**
+	 * CALLED BY ASM!
+	 */
 	public static void setLastSoundCategory(final SoundCategory sc) {
 		// log("Set last sound category");
 		lastSoundCategory = sc;
 	}
 
+	/**
+	 * CALLED BY ASM!
+	 */
 	public static void setLastSoundName(final String name) {
 		// log("Set last sound name: " + name);
 		lastSoundName = name;
 	}
 
+	/**
+	 * CALLED BY ASM!
+	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
 		// log("On play sound");
 		logGeneral("On play sound... Sounrce ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
@@ -191,13 +199,10 @@ public class SoundPhysics {
 	}
 
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
-		if (!sound.getSoundName().getResourcePath().matches(".*step.*")) {
-			// log("Offset entity say sound by " + entity.getEyeHeight());
-			return entity.getEyeHeight();
-		} else {
-			return 0.0;
-		}
-		// return 0.0;
+		if (sound.getSoundName().getResourcePath().matches(".*step.*"))
+			return 0;
+
+		return entity.getEyeHeight();
 	}
 
 	private static float getBlockReflectivity(final BlockPos blockPos) {
@@ -905,12 +910,10 @@ public class SoundPhysics {
 	// sufficiently quiet to not play it.
 	public static boolean shouldSoundPacketBeSent(final double posX, final double posY, final double posZ,
 			final double volume) {
-		if (mc.player != null) {
-			final double distance = getDistanceFromPlayer(posX, posY, posZ);
-			return distance < 32.0;
-		} else {
+		if (mc.player == null)
 			return false;
-		}
+
+		return getDistanceFromPlayer(posX, posY, posZ) < 32;
 	}
 
 	private static double getDistanceFromPlayer(final double posX, final double posY, final double posZ) {
