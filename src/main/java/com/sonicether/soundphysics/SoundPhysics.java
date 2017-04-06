@@ -806,21 +806,4 @@ public class SoundPhysics {
 		return true;
 	}
 
-	// TODO: Find fancy way of determining if a sound is going to be
-	// sufficiently quiet to not play it.
-	public static boolean shouldSoundPacketBeSent(final double posX, final double posY, final double posZ,
-			final double volume) {
-		if (mc.player == null)
-			return false;
-
-		return getDistanceFromPlayer(posX, posY, posZ) < 32;
-	}
-
-	private static double getDistanceFromPlayer(final double posX, final double posY, final double posZ) {
-		double x = mc.player.posX - posX;
-		double y = mc.player.posY - posY;
-		double z = mc.player.posZ - posZ;
-
-		return Math.sqrt(x * x + y * y + z * z);
-	}
 }
