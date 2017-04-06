@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import paulscode.sound.SoundSystemConfig;
 
 public class SoundPhysics {
@@ -44,6 +43,8 @@ public class SoundPhysics {
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
 
+	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
+	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
 	public static float globalRolloffFactor = SoundPhysicsCore.Config.rolloffFactor;
 	public static float globalVolumeMultiplier = 4.0f;
@@ -51,7 +52,7 @@ public class SoundPhysics {
 	public static double soundDistanceAllowance = SoundPhysicsCore.Config.soundDistanceAllowance;
 
 	/**
-	 * CALLED BY ASM!
+	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void init() {
 		log("Initializing Sound Physics...");
@@ -136,39 +137,24 @@ public class SoundPhysics {
 		checkErrorLog("Error creating lowpass filters!");
 
 		applyConfigChanges();
-
-		// setReverbParams(ReverbParams.getReverb0(), auxFXSlot0, reverb0);
-		// //Set the global reverb parameters and apply them to the effect and
-		// effectslot
-		// setReverbParams(ReverbParams.getReverb1(), auxFXSlot1, reverb1);
-		// //Set the global reverb parameters and apply them to the effect and
-		// effectslot
-		// setReverbParams(ReverbParams.getReverb2(), auxFXSlot2, reverb2);
-		// //Set the global reverb parameters and apply them to the effect and
-		// effectslot
-		// setReverbParams(ReverbParams.getReverb3(), auxFXSlot3, reverb3);
-		// //Set the global reverb parameters and apply them to the effect and
-		// effectslot
 	}
 
 	/**
-	 * CALLED BY ASM!
+	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void setLastSoundCategory(final SoundCategory sc) {
-		// log("Set last sound category");
 		lastSoundCategory = sc;
 	}
 
 	/**
-	 * CALLED BY ASM!
+	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void setLastSoundName(final String name) {
-		// log("Set last sound name: " + name);
 		lastSoundName = name;
 	}
 
 	/**
-	 * CALLED BY ASM!
+	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
 		// log("On play sound");
@@ -198,6 +184,9 @@ public class SoundPhysics {
 		// System.out.println(soundCategory.getCategoryName());
 	}
 
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
 		if (sound.getSoundName().getResourcePath().matches(".*step.*"))
 			return 0;
@@ -205,6 +194,7 @@ public class SoundPhysics {
 		return entity.getEyeHeight();
 	}
 
+	@SuppressWarnings("deprecation")
 	private static float getBlockReflectivity(final BlockPos blockPos) {
 		final Block block = mc.world.getBlockState(blockPos).getBlock();
 		final SoundType soundType = block.getSoundType();
@@ -241,23 +231,7 @@ public class SoundPhysics {
 	}
 
 	private static Vec3d getNormalFromFacing(final EnumFacing sideHit) {
-		/*
-		 * Vec3d normal; if (sideHit == EnumFacing.DOWN) normal = new Vec3d(0.0,
-		 * -1.0, 0.0); else if (sideHit == EnumFacing.UP) normal = new
-		 * Vec3d(0.0, 1.0, 0.0); else if (sideHit == EnumFacing.EAST) normal =
-		 * new Vec3d(1.0, 0.0, 0.0); else if (sideHit == 3) normal = new
-		 * Vec3d(-1.0, 0.0, 0.0); else if (sideHit == 4) normal = new Vec3d(0.0,
-		 * 0.0, 1.0); else normal = new Vec3d(0.0, 0.0, -1.0);
-		 * 
-		 * return normal;
-		 */
-		Vec3d normal;
-
-		final Vec3i inormal = sideHit.getDirectionVec();
-
-		normal = new Vec3d(inormal.getX(), inormal.getY(), inormal.getZ());
-
-		return normal;
+		return new Vec3d(sideHit.getDirectionVec());
 	}
 
 	private static Vec3d reflect(final Vec3d dir, final Vec3d normal) {
@@ -310,6 +284,7 @@ public class SoundPhysics {
 		return soundPos;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
 		if (posX < 0.01f && posY < 0.01f && posZ < 0.01f) {
 			// logDetailed("Menu sound!");
@@ -702,38 +677,6 @@ public class SoundPhysics {
 			sendCutoff3 *= 0.4f;
 		}
 
-		/*
-		 * //Set reverb send filter values and set source to send to all reverb
-		 * fx slots EFX10.alFilterf(sendFilter0, EFX10.AL_LOWPASS_GAIN,
-		 * sendGain0); EFX10.alFilterf(sendFilter0, EFX10.AL_LOWPASS_GAINHF,
-		 * sendCutoff0); AL11.alSource3i(sourceID,
-		 * EFX10.AL_AUXILIARY_SEND_FILTER, auxFXSlot0, 0, sendFilter0);
-		 * 
-		 * EFX10.alFilterf(sendFilter1, EFX10.AL_LOWPASS_GAIN, sendGain1);
-		 * EFX10.alFilterf(sendFilter1, EFX10.AL_LOWPASS_GAINHF, sendCutoff1);
-		 * AL11.alSource3i(sourceID, EFX10.AL_AUXILIARY_SEND_FILTER, auxFXSlot1,
-		 * 1, sendFilter1);
-		 * 
-		 * EFX10.alFilterf(sendFilter2, EFX10.AL_LOWPASS_GAIN, sendGain2);
-		 * EFX10.alFilterf(sendFilter2, EFX10.AL_LOWPASS_GAINHF, sendCutoff2);
-		 * AL11.alSource3i(sourceID, EFX10.AL_AUXILIARY_SEND_FILTER, auxFXSlot2,
-		 * 2, sendFilter2);
-		 * 
-		 * EFX10.alFilterf(sendFilter3, EFX10.AL_LOWPASS_GAIN, sendGain3);
-		 * EFX10.alFilterf(sendFilter3, EFX10.AL_LOWPASS_GAINHF, sendCutoff3);
-		 * AL11.alSource3i(sourceID, EFX10.AL_AUXILIARY_SEND_FILTER, auxFXSlot3,
-		 * 3, sendFilter3);
-		 * 
-		 * EFX10.alFilterf(directFilter0, EFX10.AL_LOWPASS_GAINHF,
-		 * directCutoff); AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER,
-		 * directFilter0);
-		 */
-
-		// sendGain0 = 1.0f;
-		// sendGain1 = 1.0f;
-		// sendGain2 = 1.0f;
-		// sendGain3 = 1.0f;
-
 		setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
 				sendCutoff3, directCutoff, directGain);
 	}
@@ -771,70 +714,37 @@ public class SoundPhysics {
 	 * effect.
 	 */
 	protected static void setReverbParams(final ReverbParams r, final int auxFXSlot, final int reverbSlot) {
-		/*
-		 * EFX10.alEffectf(reverbSlot, EFX10.AL_REVERB_DECAY_TIME, r.decayTime);
-		 * //Set default parameters EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_DENSITY, r.density); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_DIFFUSION, r.diffusion); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_GAIN, r.gain); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_GAINHF, r.gainHF); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_DECAY_HFRATIO, r.decayHFRatio);
-		 * EFX10.alEffectf(reverbSlot, EFX10.AL_REVERB_REFLECTIONS_GAIN,
-		 * r.reflectionsGain); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_REFLECTIONS_DELAY, r.reflectionsDelay);
-		 * EFX10.alEffectf(reverbSlot, EFX10.AL_REVERB_LATE_REVERB_GAIN,
-		 * r.lateReverbGain); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_LATE_REVERB_DELAY, r.lateReverbDelay);
-		 * EFX10.alEffectf(reverbSlot, EFX10.AL_REVERB_AIR_ABSORPTION_GAINHF,
-		 * r.airAbsorptionGainHF); EFX10.alEffectf(reverbSlot,
-		 * EFX10.AL_REVERB_ROOM_ROLLOFF_FACTOR, r.roomRolloffFactor);
-		 * EFX10.alEffecti(reverbSlot, EFX10.AL_REVERB_DECAY_HFLIMIT,
-		 * AL10.AL_TRUE);
-		 */
-
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DENSITY, r.density); // Set
-																			// default
-																			// parameters
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DENSITY, r.density);
 		checkErrorLog("Error while assigning reverb density: " + r.density);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DIFFUSION, r.diffusion); // Set
-																				// default
-																				// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DIFFUSION, r.diffusion);
 		checkErrorLog("Error while assigning reverb diffusion: " + r.diffusion);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_GAIN, r.gain); // Set
-																		// default
-																		// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_GAIN, r.gain);
 		checkErrorLog("Error while assigning reverb gain: " + r.gain);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_GAINHF, r.gainHF); // Set
-																			// default
-																			// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_GAINHF, r.gainHF);
 		checkErrorLog("Error while assigning reverb gainHF: " + r.gainHF);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DECAY_TIME, r.decayTime); // Set
-																					// default
-																					// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DECAY_TIME, r.decayTime);
 		checkErrorLog("Error while assigning reverb decayTime: " + r.decayTime);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DECAY_HFRATIO, r.decayHFRatio); // Set
-																						// default
-																						// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_DECAY_HFRATIO, r.decayHFRatio);
 		checkErrorLog("Error while assigning reverb decayHFRatio: " + r.decayHFRatio);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_REFLECTIONS_GAIN, r.reflectionsGain); // Set
-																								// default
-																								// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_REFLECTIONS_GAIN, r.reflectionsGain);
 		checkErrorLog("Error while assigning reverb reflectionsGain: " + r.reflectionsGain);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_LATE_REVERB_GAIN, r.lateReverbGain); // Set
-																							// default
-																							// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_LATE_REVERB_GAIN, r.lateReverbGain);
 		checkErrorLog("Error while assigning reverb lateReverbGain: " + r.lateReverbGain);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_LATE_REVERB_DELAY, r.lateReverbDelay); // Set
-																								// default
-																								// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_LATE_REVERB_DELAY, r.lateReverbDelay);
 		checkErrorLog("Error while assigning reverb lateReverbDelay: " + r.lateReverbDelay);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_AIR_ABSORPTION_GAINHF, r.airAbsorptionGainHF); // Set
-																										// default
-																										// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_AIR_ABSORPTION_GAINHF, r.airAbsorptionGainHF);
 		checkErrorLog("Error while assigning reverb airAbsorptionGainHF: " + r.airAbsorptionGainHF);
-		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, r.roomRolloffFactor); // Set
-																									// default
-																									// parameters
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, r.roomRolloffFactor);
 		checkErrorLog("Error while assigning reverb roomRolloffFactor: " + r.roomRolloffFactor);
 
 		// Attach updated effect object
@@ -846,27 +756,18 @@ public class SoundPhysics {
 	}
 
 	protected static void logOcclusion(final String message) {
-		if (!SoundPhysicsCore.Config.occlusionLogging) {
-			return;
-		}
-
-		System.out.println(logPrefix + " [OCCLUSION] " + ": " + message);
+		if (SoundPhysicsCore.Config.occlusionLogging)
+			System.out.println(logPrefix + " [OCCLUSION] " + ": " + message);
 	}
 
 	protected static void logEnvironment(final String message) {
-		if (!SoundPhysicsCore.Config.environmentLogging) {
-			return;
-		}
-
-		System.out.println(logPrefix + " [ENVIRONMENT] " + ": " + message);
+		if (SoundPhysicsCore.Config.environmentLogging)
+			System.out.println(logPrefix + " [ENVIRONMENT] " + ": " + message);
 	}
 
 	protected static void logGeneral(final String message) {
-		if (!SoundPhysicsCore.Config.debugLogging) {
-			return;
-		}
-
-		System.out.println(logPrefix + ": " + message);
+		if (SoundPhysicsCore.Config.debugLogging)
+			System.out.println(logPrefix + ": " + message);
 	}
 
 	protected static void logError(final String errorMessage) {
@@ -875,35 +776,34 @@ public class SoundPhysics {
 
 	protected static boolean checkErrorLog(final String errorMessage) {
 		final int error = AL10.alGetError();
+		if (error == 0)
+			return false;
+
 		String errorName;
 
-		if (error != 0) {
-			switch (error) {
-			case AL10.AL_INVALID_NAME:
-				errorName = "AL_INVALID_NAME";
-				break;
-			case AL10.AL_INVALID_ENUM:
-				errorName = "AL_INVALID_ENUM";
-				break;
-			case AL10.AL_INVALID_VALUE:
-				errorName = "AL_INVALID_VALUE";
-				break;
-			case AL10.AL_INVALID_OPERATION:
-				errorName = "AL_INVALID_OPERATION";
-				break;
-			case AL10.AL_OUT_OF_MEMORY:
-				errorName = "AL_OUT_OF_MEMORY";
-				break;
-			default:
-				errorName = Integer.toString(error);
-				break;
-			}
-
-			System.out.println(logPrefix + " [ERROR]: " + errorMessage + " OpenAL error " + errorName);
-			return true;
-		} else {
-			return false;
+		switch (error) {
+		case AL10.AL_INVALID_NAME:
+			errorName = "AL_INVALID_NAME";
+			break;
+		case AL10.AL_INVALID_ENUM:
+			errorName = "AL_INVALID_ENUM";
+			break;
+		case AL10.AL_INVALID_VALUE:
+			errorName = "AL_INVALID_VALUE";
+			break;
+		case AL10.AL_INVALID_OPERATION:
+			errorName = "AL_INVALID_OPERATION";
+			break;
+		case AL10.AL_OUT_OF_MEMORY:
+			errorName = "AL_OUT_OF_MEMORY";
+			break;
+		default:
+			errorName = Integer.toString(error);
+			break;
 		}
+
+		System.out.println(logPrefix + " [ERROR]: " + errorMessage + " OpenAL error " + errorName);
+		return true;
 	}
 
 	// TODO: Find fancy way of determining if a sound is going to be
@@ -921,10 +821,6 @@ public class SoundPhysics {
 		double y = mc.player.posY - posY;
 		double z = mc.player.posZ - posZ;
 
-		x *= x;
-		y *= y;
-		z *= z;
-
-		return Math.sqrt(x + y + z);
+		return Math.sqrt(x * x + y * y + z * z);
 	}
 }

@@ -10,8 +10,6 @@ public class SPGUIFactory implements IModGuiFactory {
 
 	@Override
 	public void initialize(final Minecraft minecraftInstance) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -21,13 +19,12 @@ public class SPGUIFactory implements IModGuiFactory {
 
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
-		// TODO Auto-generated method stub
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;
 	}
 

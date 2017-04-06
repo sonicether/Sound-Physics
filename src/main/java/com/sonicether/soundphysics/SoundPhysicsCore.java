@@ -168,11 +168,8 @@ public class SoundPhysicsCore implements IClassTransformer {
 	}
 
 	private void log(final String message) {
-		if (!Config.debugLogging) {
-			return;
-		}
-
-		System.out.println(message);
+		if (Config.debugLogging)
+			System.out.println(message);
 	}
 
 	@Override
@@ -214,7 +211,7 @@ public class SoundPhysicsCore implements IClassTransformer {
 		toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 				"setLastSoundName", "(Ljava/lang/String;)V", false));
 		helperList2 = new InsnList();
-		helperList2.add(new VarInsnNode(25, 1));
+		helperList2.add(new VarInsnNode(Opcodes.ALOAD, 1));
 		helperList2.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "ccc", "a", "()Lkq;", true));
 		helperList2.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "kq", "toString", "()Ljava/lang/String;", false));
 		helperList2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
@@ -313,23 +310,6 @@ public class SoundPhysicsCore implements IClassTransformer {
 		return bytes;
 	}
 
-	/**
-	 *
-	 * @param currentClassName
-	 * @param bytes
-	 * @param targetClassNames
-	 *            {deobfuscatedName, obfuscatedName}
-	 * @param targetMethodNames
-	 *            {deobfuscatedName, obfuscatedName}
-	 * @param targetMethodSignature
-	 * @param targetNodeOpcode
-	 * @param targetNodeType
-	 * @param targetInvocationMethodNames
-	 *            {deobfuscatedName, obfuscatedName}
-	 * @param instructionsToInject
-	 * @param insertBefore
-	 * @return
-	 */
 	private byte[] patchMethodInClass(final String currentClassName, final byte[] bytes,
 			final String[] targetClassNames, final String[] targetMethodNames, final String[] targetMethodSignatures,
 			final int targetNodeOpcode, final int targetNodeType, final String[] targetInvocationMethodNames,
