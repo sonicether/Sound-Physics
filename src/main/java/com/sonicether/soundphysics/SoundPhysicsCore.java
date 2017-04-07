@@ -36,7 +36,7 @@ public class SoundPhysicsCore implements IClassTransformer {
 	public static Configuration configFile;
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.0";
+	public static final String version = "1.0.1";
 
 	// Config variables
 	public static class Config {
