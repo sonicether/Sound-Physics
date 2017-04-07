@@ -157,14 +157,8 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
-		// log("On play sound");
-		logGeneral("On play sound... Sounrce ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
+		logGeneral("onPlaySound, Source ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
 				+ "    Sound category: " + lastSoundCategory.toString() + "    Sound name: " + lastSoundName);
-
-		// Set source to send to reverb
-		// EFX10.alFilterf(sendFilter0, EFX10.AL_LOWPASS_GAINHF, 0.1f);
-		// AL11.alSource3i(sourceID, EFX10.AL_AUXILIARY_SEND_FILTER, auxFXSlot0,
-		// 0, sendFilter0);
 
 		long startTime = 0;
 		long endTime = 0;
@@ -180,8 +174,6 @@ public class SoundPhysics {
 			log("Total calculation time for sound " + lastSoundName + ": "
 					+ (double) (endTime - startTime) / (double) 1000000 + " milliseconds");
 		}
-
-		// System.out.println(soundCategory.getCategoryName());
 	}
 
 	/**
@@ -245,63 +237,59 @@ public class SoundPhysics {
 		return new Vec3d(x, y, z);
 	}
 
-	private static Vec3d offsetSoundByName(Vec3d soundPos, final Vec3d playerPos, final String name,
-			final String soundCategory) {
+	private static Vec3d offsetSoundByName(double soundX, double soundY, double soundZ, final Vec3d playerPos,
+			final String name, final SoundCategory category) {
 		double offsetX = 0.0;
 		double offsetY = 0.0;
 		double offsetZ = 0.0;
-
 		double offsetTowardsPlayer = 0.0;
 
-		final Vec3d toPlayerVector = playerPos.subtract(soundPos).normalize();
+		double tempNormX = 0;
+		double tempNormY = 0;
+		double tempNormZ = 0;
 
-		// names
-		if (name.matches(".*step.*")) {
+		if (soundY % 1.0 < 0.001 || name.matches(".*step.*")) {
 			offsetY = 0.1;
 		}
 
-		// categories
-		if (soundCategory.matches("block") || soundCategory.matches("record")) {
-			offsetTowardsPlayer = 0.89;
+		if (category == SoundCategory.BLOCKS || category == SoundCategory.RECORDS || name.matches(".*block.*")) {
+			// The ray will probably hit the block that it's emitting from
+			// before
+			// escaping. Offset the ray start position towards the player by the
+			// diagonal half length of a cube
+
+			tempNormX = playerPos.xCoord - soundX;
+			tempNormY = playerPos.yCoord - soundY;
+			tempNormZ = playerPos.zCoord - soundZ;
+			double length = Math.sqrt(tempNormX * tempNormX + tempNormY * tempNormY + tempNormZ * tempNormZ);
+			tempNormX /= length;
+			tempNormY /= length;
+			tempNormZ /= length;
+			// 0.867 > square root of 0.5^2 * 3
+			offsetTowardsPlayer = 0.867;
+			offsetX += tempNormX * offsetTowardsPlayer;
+			offsetY += tempNormY * offsetTowardsPlayer;
+			offsetZ += tempNormZ * offsetTowardsPlayer;
 		}
 
-		if (soundPos.yCoord % 1.0 < 0.001 && soundPos.yCoord > 0.01) {
-			offsetY = 0.1;
-		}
-
-		offsetX += toPlayerVector.xCoord * offsetTowardsPlayer;
-		offsetY += toPlayerVector.yCoord * offsetTowardsPlayer;
-		offsetZ += toPlayerVector.zCoord * offsetTowardsPlayer;
-
-		// soundPos.xCoord += offsetX;
-		// soundPos.yCoord += offsetY;
-		// soundPos.zCoord += offsetZ;
-		soundPos = soundPos.addVector(offsetX, offsetY, offsetZ);
-
-		// logDetailed("Offset sound by " + offsetX + ", " + offsetY + ", " +
-		// offsetZ);
-
-		return soundPos;
+		return new Vec3d(soundX + offsetX, soundY + offsetY, soundZ + offsetZ);
 	}
 
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
 		if (posX < 0.01f && posY < 0.01f && posZ < 0.01f) {
-			// logDetailed("Menu sound!");
-
+			// Supposed to catch menu sounds, but quite crude
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
 
-		if (mc.player == null) {
+		if (mc.player == null || mc.world == null) {
 			return;
 		}
 
-		if (mc.world == null) {
-			return;
-		}
+		final boolean isRain = lastSoundName.matches(".*rain.*");
 
-		if (SoundPhysicsCore.Config.skipRainOcclusionTracing && lastSoundName.matches(".*rain.*")) {
+		if (SoundPhysicsCore.Config.skipRainOcclusionTracing && isRain) {
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
@@ -309,96 +297,44 @@ public class SoundPhysics {
 		float directCutoff = 1.0f;
 		final float absorptionCoeff = SoundPhysicsCore.Config.globalBlockAbsorption * 3.0f;
 
-		// Direct sound occlusion
-		Vec3d soundPos = new Vec3d(posX, posY, posZ);
-		Vec3d playerPos = mc.player.getPositionVector();
-		playerPos = new Vec3d(playerPos.xCoord, playerPos.yCoord + mc.player.getEyeHeight(), playerPos.zCoord);
-
-		soundPos = offsetSoundByName(soundPos, playerPos, lastSoundName, lastSoundCategory.getName());
-
-		// Vec3d toPlayerVector = soundPos.subtract(playerPos).normalize();
-		final Vec3d toPlayerVector = playerPos.subtract(soundPos).normalize();
+		final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
+		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, lastSoundName, lastSoundCategory);
+		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
 		logGeneral("Player pos: " + playerPos.xCoord + ", " + playerPos.yCoord + ", " + playerPos.zCoord
 				+ "      Sound Pos: " + soundPos.xCoord + ", " + soundPos.yCoord + ", " + soundPos.zCoord
-				+ "       To player vector: " + toPlayerVector.xCoord + ", " + toPlayerVector.yCoord + ", "
-				+ toPlayerVector.zCoord);
+				+ "       To player vector: " + normalToPlayer.xCoord + ", " + normalToPlayer.yCoord + ", "
+				+ normalToPlayer.zCoord);
 
-		// Cast a ray from the source towards the player
-		// The ray will probably hit the block that it's emitting from before
-		// escaping. Offset the ray start position towards the player by the
-		// diagonal half length of a cube
-		Vec3d rayOrigin = new Vec3d(soundPos.xCoord, soundPos.yCoord, soundPos.zCoord);
-		if (lastSoundName.matches(".*block.*")) {
-			rayOrigin = rayOrigin.add(toPlayerVector.scale(0.867));
-		}
-
-		boolean thisHitSolid = false; // TODO: This will be true if the sound
-										// doesn't come from inside a block!
+		Vec3d rayOrigin = soundPos;
 
 		float occlusionAccumulation = 0.0f;
 
 		for (int i = 0; i < 10; i++) {
 			final RayTraceResult rayHit = mc.world.rayTraceBlocks(rayOrigin, playerPos, true);
 
-			// If we hit a block
-			if (rayHit != null) {
-				// Get the normal of the side hit
-				// Vec3d hitNormal = getNormalFromFacing(rayHit.sideHit);
-
-				// int nextBlockPosX = (int)Math.floor(rayHit.hitVec.xCoord +
-				// toPlayerVector.xCoord * 0.001);
-				// int nextBlockPosY = (int)Math.floor(rayHit.hitVec.xCoord +
-				// toPlayerVector.xCoord * 0.001);
-				// int nextBlockPosZ = (int)Math.floor(rayHit.hitVec.xCoord +
-				// toPlayerVector.xCoord * 0.001);
-
-				// Block blockHit = mc.world.getBlock(rayHit.blockX,
-				// rayHit.blockY, rayHit.blockZ);
-				final Block blockHit = mc.world.getBlockState(rayHit.getBlockPos()).getBlock();
-
-				float blockOcclusion = 1.0f;
-
-				if (!blockHit.isOpaqueCube(blockHit.getDefaultState())) {
-					// log("not a solid block!");
-					blockOcclusion *= 0.15f;
-				}
-
-				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord
-						+ ", " + rayHit.hitVec.zCoord);
-
-				// Accumulate density
-				occlusionAccumulation += blockOcclusion;
-				// occlusionAccumulation += 1.0f * (1.0f /
-				// (float)numOcclusionHits);
-
-				// Set the new ray step pos
-				// rayOrigin.xCoord = rayHit.hitVec.xCoord +
-				// toPlayerVector.xCoord * 0.01;
-				// rayOrigin.yCoord = rayHit.hitVec.yCoord +
-				// toPlayerVector.yCoord * 0.01;
-				// rayOrigin.zCoord = rayHit.hitVec.zCoord +
-				// toPlayerVector.zCoord * 0.01;
-				// rayOrigin.add(rayHit.hitVec.scale(0.01));
-				// rayOrigin = rayHit.hitVec.add(toPlayerVector.scale(0.01));
-				rayOrigin = new Vec3d(rayHit.hitVec.xCoord + toPlayerVector.xCoord * 0.1,
-						rayHit.hitVec.yCoord + toPlayerVector.yCoord * 0.1,
-						rayHit.hitVec.zCoord + toPlayerVector.zCoord * 0.1);
-				// rayOrigin = new Vec3d(rayOrigin.xCoord, rayOrigin.yCoord +
-				// 2.0, rayOrigin.zCoord);
-
-				logOcclusion(
-						"New trace position: " + rayOrigin.xCoord + ", " + rayOrigin.yCoord + ", " + rayOrigin.zCoord);
-
-				// System.out.println(rayHit.sideHit);
-				// cutoff = 0.05f;
-
-				thisHitSolid = !thisHitSolid;
-			} else {
-				// System.out.println("Didn't hit anything!");
+			if (rayHit == null)
 				break;
+
+			final Block blockHit = mc.world.getBlockState(rayHit.getBlockPos()).getBlock();
+
+			float blockOcclusion = 1.0f;
+
+			if (!blockHit.isOpaqueCube(blockHit.getDefaultState())) {
+				// log("not a solid block!");
+				blockOcclusion *= 0.15f;
 			}
 
+			logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord
+					+ ", " + rayHit.hitVec.zCoord);
+
+			occlusionAccumulation += blockOcclusion;
+
+			rayOrigin = new Vec3d(rayHit.hitVec.xCoord + normalToPlayer.xCoord * 0.1,
+					rayHit.hitVec.yCoord + normalToPlayer.yCoord * 0.1,
+					rayHit.hitVec.zCoord + normalToPlayer.zCoord * 0.1);
+
+			logOcclusion("New trace position: " + rayOrigin.xCoord + ", " + rayOrigin.yCoord + ", " + rayOrigin.zCoord);
 		}
 
 		directCutoff = (float) Math.exp(-occlusionAccumulation * absorptionCoeff);
@@ -421,7 +357,7 @@ public class SoundPhysics {
 			directCutoff *= 1.0f - SoundPhysicsCore.Config.underwaterFilter;
 		}
 
-		if (lastSoundName.matches(".*rain.*")) {
+		if (isRain) {
 			setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
 					sendCutoff3, directCutoff, directGain);
 			return;
@@ -435,21 +371,17 @@ public class SoundPhysics {
 		final int numRays = SoundPhysicsCore.Config.environmentEvaluationRays;
 		final int rayBounces = 4;
 
-		final int[] rayHits = new int[rayBounces];
-
 		final float[] bounceReflectivityRatio = new float[rayBounces];
 
 		float sharedAirspace = 0.0f;
 
 		final float rcpTotalRays = 1.0f / (numRays * rayBounces);
-		final float rcpPrimaryRays = 1.0f / (numRays);
-
-		final double reflectionEnergyCurve = 1.0;
+		final float rcpPrimaryRays = 1.0f / numRays;
 
 		for (int i = 0; i < numRays; i++) {
 			final float fi = i;
 			final float fiN = fi / numRays;
-			final float longitude = gAngle * fi * 1.0f;
+			final float longitude = gAngle * fi;
 			final float latitude = (float) Math.asin(fiN * 2.0f - 1.0f);
 
 			Vec3d rayDir = new Vec3d(0.0, 0.0, 0.0);
@@ -495,31 +427,18 @@ public class SoundPhysics {
 							newRayStart.yCoord + newRayDir.yCoord * maxDistance,
 							newRayStart.zCoord + newRayDir.zCoord * maxDistance);
 
-					// log("New ray dir: " + newRayDir.xCoord + ", " +
-					// newRayDir.yCoord + ", " + newRayDir.zCoord);
-
 					final RayTraceResult newRayHit = mc.world.rayTraceBlocks(newRayStart, newRayEnd, true);
 
-					// float energyTowardsPlayer =
-					// (float)Math.pow(MathHelper.clamp_float(soundDirToPlayerDot,
-					// 0.0f, 1.0f), 1.0f);
 					float energyTowardsPlayer = 0.25f;
 					final float blockReflectivity = getBlockReflectivity(lastHitBlock);
 					energyTowardsPlayer *= blockReflectivity * 0.75f + 0.25f;
-					final float bounceToPlayerDistance = (float) lastHitPos.distanceTo(playerPos);
-					// energyTowardsPlayer *= 1.0f /
-					// ((float)Math.pow(bounceToPlayerDistance, 2.0) + 0.01f);
 
-					if (newRayHit != null) {
-						// if ray got obstructed before it reached the player,
-						// it wasn't heard
-						if (lastHitPos.distanceTo(newRayHit.hitVec) < bounceToPlayerDistance) {
-							// energyTowardsPlayer *= 0.0f;
-						}
-
+					if (newRayHit == null) {
+						totalRayDistance += lastHitPos.distanceTo(playerPos);
+					} else {
 						final double newRayLength = lastHitPos.distanceTo(newRayHit.hitVec);
-						rayHits[j]++;
-						bounceReflectivityRatio[j] += (float) Math.pow(blockReflectivity, reflectionEnergyCurve);
+
+						bounceReflectivityRatio[j] += (float) blockReflectivity;
 
 						totalRayDistance += newRayLength;
 
@@ -544,22 +463,16 @@ public class SoundPhysics {
 								sharedAirspace += 1.0f;
 							}
 						}
-					} else {
-						totalRayDistance += lastHitPos.distanceTo(playerPos);
 					}
 
-					final float reflectionDelay = (float) Math.pow(Math.max(totalRayDistance, 0.0), 1.0) * 0.12f
-							* blockReflectivity;
+					final float reflectionDelay = (float) Math.max(totalRayDistance, 0.0) * 0.12f * blockReflectivity;
 
 					final float cross0 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 0.0f), 0.0f, 1.0f);
 					final float cross1 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 1.0f), 0.0f, 1.0f);
 					final float cross2 = 1.0f - MathHelper.clamp(Math.abs(reflectionDelay - 2.0f), 0.0f, 1.0f);
-					// float cross3 = 1.0f -
-					// MathHelper.clamp_float(Math.abs(reflectionDelay - 3.0f),
-					// 0.0f, 1.0f);
 					final float cross3 = MathHelper.clamp(reflectionDelay - 2.0f, 0.0f, 1.0f);
 
-					/* 1.0 / numRays */ sendGain0 += cross0 * energyTowardsPlayer * 6.4f * rcpTotalRays;
+					sendGain0 += cross0 * energyTowardsPlayer * 6.4f * rcpTotalRays;
 					sendGain1 += cross1 * energyTowardsPlayer * 12.8f * rcpTotalRays;
 					sendGain2 += cross2 * energyTowardsPlayer * 12.8f * rcpTotalRays;
 					sendGain3 += cross3 * energyTowardsPlayer * 12.8f * rcpTotalRays;
@@ -569,28 +482,16 @@ public class SoundPhysics {
 						break;
 					}
 				}
-
-				// log("Hit " + mc.world.getBlock(rayHit.blockX, rayHit.blockY,
-				// rayHit.blockZ).getUnlocalizedName() + " at " +
-				// rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord + ", " +
-				// rayHit.hitVec.zCoord + " and travelled " + rayLength + "
-				// meters.");
-			} else {
-				// log("Escaped");
 			}
 
 		}
 
 		// log("total reflectivity ratio: " + totalReflectivityRatio);
 
-		bounceReflectivityRatio[0] = (float) Math.pow(bounceReflectivityRatio[0] / numRays,
-				1.0 / reflectionEnergyCurve);
-		bounceReflectivityRatio[1] = (float) Math.pow(bounceReflectivityRatio[1] / numRays,
-				1.0 / reflectionEnergyCurve);
-		bounceReflectivityRatio[2] = (float) Math.pow(bounceReflectivityRatio[2] / numRays,
-				1.0 / reflectionEnergyCurve);
-		bounceReflectivityRatio[3] = (float) Math.pow(bounceReflectivityRatio[3] / numRays,
-				1.0 / reflectionEnergyCurve);
+		bounceReflectivityRatio[0] = bounceReflectivityRatio[0] / numRays;
+		bounceReflectivityRatio[1] = bounceReflectivityRatio[1] / numRays;
+		bounceReflectivityRatio[2] = bounceReflectivityRatio[2] / numRays;
+		bounceReflectivityRatio[3] = bounceReflectivityRatio[3] / numRays;
 
 		sharedAirspace *= 64.0f;
 
@@ -622,33 +523,16 @@ public class SoundPhysics {
 
 		directGain = (float) Math.pow(directCutoff, 0.1);
 
-		// logDetailed("HitRatio0: " + hitRatioBounce1 + " HitRatio1: " +
-		// hitRatioBounce2 + " HitRatio2: " + hitRatioBounce3 + " HitRatio3: " +
-		// hitRatioBounce4);
-
 		logEnvironment("Bounce reflectivity 0: " + bounceReflectivityRatio[0] + " bounce reflectivity 1: "
 				+ bounceReflectivityRatio[1] + " bounce reflectivity 2: " + bounceReflectivityRatio[2]
 				+ " bounce reflectivity 3: " + bounceReflectivityRatio[3]);
 
-		sendGain1 *= (float) Math.pow(bounceReflectivityRatio[1], 1.0);
-		// sendGain1 += sendGain2 * (1.0f -
-		// (float)Math.pow(bounceReflectivityRatio[2], 3.0)) * 0.5f;
-		// sendGain1 += sendGain3 * (1.0f -
-		// (float)Math.pow(bounceReflectivityRatio[3], 4.0)) * 0.5f;
+		sendGain1 *= (float) bounceReflectivityRatio[1];
 		sendGain2 *= (float) Math.pow(bounceReflectivityRatio[2], 3.0);
 		sendGain3 *= (float) Math.pow(bounceReflectivityRatio[3], 4.0);
 
-		// good previously
-		/*
-		 * sendGain1 *= (float)Math.pow(hitRatioBounce2, 2.0); sendGain1 +=
-		 * sendGain2 * (1.0f - (float)Math.pow(hitRatioBounce3, 3.0)) * 0.5f;
-		 * sendGain1 += sendGain3 * (1.0f - (float)Math.pow(hitRatioBounce4,
-		 * 4.0)) * 0.5f; sendGain2 *= (float)Math.pow(hitRatioBounce3, 3.0);
-		 * sendGain3 *= (float)Math.pow(hitRatioBounce4, 4.0);
-		 */
-
-		sendGain0 = MathHelper.clamp(sendGain0 * 1.00f - 0.00f, 0.0f, 1.0f);
-		sendGain1 = MathHelper.clamp(sendGain1 * 1.00f - 0.00f, 0.0f, 1.0f);
+		sendGain0 = MathHelper.clamp(sendGain0, 0.0f, 1.0f);
+		sendGain1 = MathHelper.clamp(sendGain1, 0.0f, 1.0f);
 		sendGain2 = MathHelper.clamp(sendGain2 * 1.05f - 0.05f, 0.0f, 1.0f);
 		sendGain3 = MathHelper.clamp(sendGain3 * 1.05f - 0.05f, 0.0f, 1.0f);
 
@@ -659,16 +543,6 @@ public class SoundPhysics {
 
 		logEnvironment("Final environment settings:   " + sendGain0 + ",   " + sendGain1 + ",   " + sendGain2 + ",   "
 				+ sendGain3);
-
-		// sendGain0 *= sharedAirspaceWeight0 * 0.5f + 0.5f;
-		// sendGain1 *= sharedAirspaceWeight1 * 0.5f + 0.5f;
-		// sendGain2 *= sharedAirspaceWeight2 * 0.5f + 0.5f;
-		// sendGain3 *= sharedAirspaceWeight3 * 0.5f + 0.5f;
-
-		// sendGain0 = 1.0f;
-		// sendGain1 = 1.0f;
-		// sendGain2 = 0.0f;
-		// sendGain3 = 0.0f;
 
 		if (mc.player.isInWater()) {
 			sendCutoff0 *= 0.4f;
