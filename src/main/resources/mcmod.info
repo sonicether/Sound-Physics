@@ -3,7 +3,7 @@
   "modid": "soundphysics",
   "name": "Sound Physics",
   "description": "Provides realistic sound attenuation, reverberation, and absorption through blocks.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "mcversion": "1.11.2",
   "url": "",
   "authorList": ["Sonic Ether"]

@@ -19,9 +19,35 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import paulscode.sound.SoundSystemConfig;
 
+@Mod(modid = SoundPhysics.modid, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
 public class SoundPhysics {
+
+	public static final String modid = "soundphysics";
+	public static final String version = "1.0.2";
+	@Instance(modid)
+	public static SoundPhysics instance;
+
+	public final Config config;
+
+	public SoundPhysics() {
+		this.config = new Config();
+	}
+
+	@Mod.EventHandler
+	public void preInit(final FMLPreInitializationEvent event) {
+		this.config.preInit(event);
+	}
+
+	@Mod.EventHandler
+	public void init(final FMLInitializationEvent event) {
+		this.config.init(event);
+	}
 
 	private static final String logPrefix = "[SOUND PHYSICS]";
 	private static int auxFXSlot0;
@@ -46,10 +72,10 @@ public class SoundPhysics {
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
-	public static float globalRolloffFactor = SoundPhysicsCore.Config.rolloffFactor;
+	public static float globalRolloffFactor = Config.rolloffFactor;
 	public static float globalVolumeMultiplier = 4.0f;
-	public static float globalReverbMultiplier = 0.7f * SoundPhysicsCore.Config.globalReverbGain;
-	public static double soundDistanceAllowance = SoundPhysicsCore.Config.soundDistanceAllowance;
+	public static float globalReverbMultiplier = 0.7f * Config.globalReverbGain;
+	public static double soundDistanceAllowance = Config.soundDistanceAllowance;
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
@@ -61,9 +87,9 @@ public class SoundPhysics {
 	}
 
 	public static void applyConfigChanges() {
-		globalRolloffFactor = SoundPhysicsCore.Config.rolloffFactor;
-		globalReverbMultiplier = 0.7f * SoundPhysicsCore.Config.globalReverbGain;
-		soundDistanceAllowance = SoundPhysicsCore.Config.soundDistanceAllowance;
+		globalRolloffFactor = Config.rolloffFactor;
+		globalReverbMultiplier = 0.7f * Config.globalReverbGain;
+		soundDistanceAllowance = Config.soundDistanceAllowance;
 
 		if (auxFXSlot0 != 0) {
 			// Set the global reverb parameters and apply them to the effect and
@@ -157,19 +183,21 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
-		logGeneral("onPlaySound, Source ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
-				+ "    Sound category: " + lastSoundCategory.toString() + "    Sound name: " + lastSoundName);
+		if (Config.debugLogging) {
+			logGeneral("onPlaySound, Source ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
+					+ "    Sound category: " + lastSoundCategory.toString() + "    Sound name: " + lastSoundName);
+		}
 
 		long startTime = 0;
 		long endTime = 0;
 
-		if (SoundPhysicsCore.Config.performanceLogging) {
+		if (Config.performanceLogging) {
 			startTime = System.nanoTime();
 		}
 
 		evaluateEnvironment(sourceID, posX, posY, posZ);
 
-		if (SoundPhysicsCore.Config.performanceLogging) {
+		if (Config.performanceLogging) {
 			endTime = System.nanoTime();
 			log("Total calculation time for sound " + lastSoundName + ": "
 					+ (double) (endTime - startTime) / (double) 1000000 + " milliseconds");
@@ -180,8 +208,9 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
-		if (sound.getSoundName().getResourcePath().matches(".*step.*"))
+		if (sound.getSoundName().getResourcePath().matches(".*step.*")) {
 			return 0;
+		}
 
 		return entity.getEyeHeight();
 	}
@@ -194,30 +223,30 @@ public class SoundPhysics {
 		float reflectivity = 0.5f;
 
 		if (soundType == SoundType.STONE) {
-			reflectivity = SoundPhysicsCore.Config.stoneReflectivity;
+			reflectivity = Config.stoneReflectivity;
 		} else if (soundType == SoundType.WOOD) {
-			reflectivity = SoundPhysicsCore.Config.woodReflectivity;
+			reflectivity = Config.woodReflectivity;
 		} else if (soundType == SoundType.GROUND) {
-			reflectivity = SoundPhysicsCore.Config.groundReflectivity;
+			reflectivity = Config.groundReflectivity;
 		} else if (soundType == SoundType.PLANT) {
-			reflectivity = SoundPhysicsCore.Config.plantReflectivity;
+			reflectivity = Config.plantReflectivity;
 		} else if (soundType == SoundType.METAL) {
-			reflectivity = SoundPhysicsCore.Config.metalReflectivity;
+			reflectivity = Config.metalReflectivity;
 		} else if (soundType == SoundType.GLASS) {
-			reflectivity = SoundPhysicsCore.Config.glassReflectivity;
+			reflectivity = Config.glassReflectivity;
 		} else if (soundType == SoundType.CLOTH) {
-			reflectivity = SoundPhysicsCore.Config.clothReflectivity;
+			reflectivity = Config.clothReflectivity;
 		} else if (soundType == SoundType.SAND) {
-			reflectivity = SoundPhysicsCore.Config.sandReflectivity;
+			reflectivity = Config.sandReflectivity;
 		} else if (soundType == SoundType.SNOW) {
-			reflectivity = SoundPhysicsCore.Config.snowReflectivity;
+			reflectivity = Config.snowReflectivity;
 		} else if (soundType == SoundType.LADDER) {
-			reflectivity = SoundPhysicsCore.Config.woodReflectivity;
+			reflectivity = Config.woodReflectivity;
 		} else if (soundType == SoundType.ANVIL) {
-			reflectivity = SoundPhysicsCore.Config.metalReflectivity;
+			reflectivity = Config.metalReflectivity;
 		}
 
-		reflectivity *= SoundPhysicsCore.Config.globalBlockReflectance;
+		reflectivity *= Config.globalBlockReflectance;
 
 		return reflectivity;
 	}
@@ -237,8 +266,8 @@ public class SoundPhysics {
 		return new Vec3d(x, y, z);
 	}
 
-	private static Vec3d offsetSoundByName(double soundX, double soundY, double soundZ, final Vec3d playerPos,
-			final String name, final SoundCategory category) {
+	private static Vec3d offsetSoundByName(final double soundX, final double soundY, final double soundZ,
+			final Vec3d playerPos, final String name, final SoundCategory category) {
 		double offsetX = 0.0;
 		double offsetY = 0.0;
 		double offsetZ = 0.0;
@@ -261,7 +290,7 @@ public class SoundPhysics {
 			tempNormX = playerPos.xCoord - soundX;
 			tempNormY = playerPos.yCoord - soundY;
 			tempNormZ = playerPos.zCoord - soundZ;
-			double length = Math.sqrt(tempNormX * tempNormX + tempNormY * tempNormY + tempNormZ * tempNormZ);
+			final double length = Math.sqrt(tempNormX * tempNormX + tempNormY * tempNormY + tempNormZ * tempNormZ);
 			tempNormX /= length;
 			tempNormY /= length;
 			tempNormZ /= length;
@@ -277,34 +306,32 @@ public class SoundPhysics {
 
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
-		if (posX < 0.01f && posY < 0.01f && posZ < 0.01f) {
-			// Supposed to catch menu sounds, but quite crude
+		if (mc.player == null || mc.world == null || posY <= 0) {
+			// Menu clicks, posY <= 0 as a condition has to be there: Ingame menu clicks do have a player and world present
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-			return;
-		}
-
-		if (mc.player == null || mc.world == null) {
 			return;
 		}
 
 		final boolean isRain = lastSoundName.matches(".*rain.*");
 
-		if (SoundPhysicsCore.Config.skipRainOcclusionTracing && isRain) {
+		if (Config.skipRainOcclusionTracing && isRain) {
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
 
 		float directCutoff = 1.0f;
-		final float absorptionCoeff = SoundPhysicsCore.Config.globalBlockAbsorption * 3.0f;
+		final float absorptionCoeff = Config.globalBlockAbsorption * 3.0f;
 
 		final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
 		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, lastSoundName, lastSoundCategory);
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
-		logGeneral("Player pos: " + playerPos.xCoord + ", " + playerPos.yCoord + ", " + playerPos.zCoord
-				+ "      Sound Pos: " + soundPos.xCoord + ", " + soundPos.yCoord + ", " + soundPos.zCoord
-				+ "       To player vector: " + normalToPlayer.xCoord + ", " + normalToPlayer.yCoord + ", "
-				+ normalToPlayer.zCoord);
+		if (Config.debugLogging) {
+			logGeneral("Player pos: " + playerPos.xCoord + ", " + playerPos.yCoord + ", " + playerPos.zCoord
+					+ "      Sound Pos: " + soundPos.xCoord + ", " + soundPos.yCoord + ", " + soundPos.zCoord
+					+ "       To player vector: " + normalToPlayer.xCoord + ", " + normalToPlayer.yCoord + ", "
+					+ normalToPlayer.zCoord);
+		}
 
 		Vec3d rayOrigin = soundPos;
 
@@ -313,8 +340,9 @@ public class SoundPhysics {
 		for (int i = 0; i < 10; i++) {
 			final RayTraceResult rayHit = mc.world.rayTraceBlocks(rayOrigin, playerPos, true);
 
-			if (rayHit == null)
+			if (rayHit == null) {
 				break;
+			}
 
 			final Block blockHit = mc.world.getBlockState(rayHit.getBlockPos()).getBlock();
 
@@ -325,8 +353,10 @@ public class SoundPhysics {
 				blockOcclusion *= 0.15f;
 			}
 
-			logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord
-					+ ", " + rayHit.hitVec.zCoord);
+			if (Config.occlusionLogging) {
+				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord
+						+ ", " + rayHit.hitVec.zCoord);
+			}
 
 			occlusionAccumulation += blockOcclusion;
 
@@ -334,13 +364,18 @@ public class SoundPhysics {
 					rayHit.hitVec.yCoord + normalToPlayer.yCoord * 0.1,
 					rayHit.hitVec.zCoord + normalToPlayer.zCoord * 0.1);
 
-			logOcclusion("New trace position: " + rayOrigin.xCoord + ", " + rayOrigin.yCoord + ", " + rayOrigin.zCoord);
+			if (Config.occlusionLogging) {
+				logOcclusion(
+						"New trace position: " + rayOrigin.xCoord + ", " + rayOrigin.yCoord + ", " + rayOrigin.zCoord);
+			}
 		}
 
 		directCutoff = (float) Math.exp(-occlusionAccumulation * absorptionCoeff);
 		float directGain = (float) Math.pow(directCutoff, 0.1);
 
-		logOcclusion("direct cutoff: " + directCutoff + "  direct gain:" + directGain);
+		if (Config.occlusionLogging) {
+			logOcclusion("direct cutoff: " + directCutoff + "  direct gain:" + directGain);
+		}
 
 		// Calculate reverb parameters for this sound
 		float sendGain0 = 0.0f;
@@ -354,7 +389,7 @@ public class SoundPhysics {
 		float sendCutoff3 = 1.0f;
 
 		if (mc.player.isInsideOfMaterial(Material.WATER)) {
-			directCutoff *= 1.0f - SoundPhysicsCore.Config.underwaterFilter;
+			directCutoff *= 1.0f - Config.underwaterFilter;
 		}
 
 		if (isRain) {
@@ -368,7 +403,7 @@ public class SoundPhysics {
 		final float gAngle = phi * (float) Math.PI * 2.0f;
 		final float maxDistance = 256.0f;
 
-		final int numRays = SoundPhysicsCore.Config.environmentEvaluationRays;
+		final int numRays = Config.environmentEvaluationRays;
 		final int rayBounces = 4;
 
 		final float[] bounceReflectivityRatio = new float[rayBounces];
@@ -384,20 +419,9 @@ public class SoundPhysics {
 			final float longitude = gAngle * fi;
 			final float latitude = (float) Math.asin(fiN * 2.0f - 1.0f);
 
-			Vec3d rayDir = new Vec3d(0.0, 0.0, 0.0);
-			// rayDir.xCoord = Math.cos(latitude) * Math.cos(longitude);
-			// rayDir.zCoord = Math.cos(latitude) * Math.sin(longitude);
-			// rayDir.yCoord = Math.sin(latitude);
-			{
-				final double x = Math.cos(latitude) * Math.cos(longitude);
-				final double y = Math.cos(latitude) * Math.sin(longitude);
-				final double z = Math.sin(latitude);
-				rayDir = new Vec3d(x, y, z);
-			}
+			final Vec3d rayDir = new Vec3d(Math.cos(latitude) * Math.cos(longitude),
+					Math.cos(latitude) * Math.sin(longitude), Math.sin(latitude));
 
-			// Vec3d rayStart = Vec3d.createVectorHelper(soundPos.xCoord +
-			// rayDir.xCoord * 0.867, soundPos.yCoord + rayDir.yCoord * 0.867,
-			// soundPos.zCoord + rayDir.zCoord * 0.867);
 			final Vec3d rayStart = new Vec3d(soundPos.xCoord, soundPos.yCoord, soundPos.zCoord);
 
 			final Vec3d rayEnd = new Vec3d(rayStart.xCoord + rayDir.xCoord * maxDistance,
@@ -438,7 +462,7 @@ public class SoundPhysics {
 					} else {
 						final double newRayLength = lastHitPos.distanceTo(newRayHit.hitVec);
 
-						bounceReflectivityRatio[j] += (float) blockReflectivity;
+						bounceReflectivityRatio[j] += blockReflectivity;
 
 						totalRayDistance += newRayLength;
 
@@ -450,8 +474,8 @@ public class SoundPhysics {
 						// Cast one final ray towards the player. If it's
 						// unobstructed, then the sound source and the player
 						// share airspace.
-						if (SoundPhysicsCore.Config.simplerSharedAirspaceSimulation && j == rayBounces - 1
-								|| !SoundPhysicsCore.Config.simplerSharedAirspaceSimulation) {
+						if (Config.simplerSharedAirspaceSimulation && j == rayBounces - 1
+								|| !Config.simplerSharedAirspaceSimulation) {
 							final Vec3d finalRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01,
 									lastHitPos.yCoord + lastHitNormal.yCoord * 0.01,
 									lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
@@ -495,7 +519,7 @@ public class SoundPhysics {
 
 		sharedAirspace *= 64.0f;
 
-		if (SoundPhysicsCore.Config.simplerSharedAirspaceSimulation) {
+		if (Config.simplerSharedAirspaceSimulation) {
 			sharedAirspace *= rcpPrimaryRays;
 		} else {
 			sharedAirspace *= rcpTotalRays;
@@ -523,11 +547,13 @@ public class SoundPhysics {
 
 		directGain = (float) Math.pow(directCutoff, 0.1);
 
-		logEnvironment("Bounce reflectivity 0: " + bounceReflectivityRatio[0] + " bounce reflectivity 1: "
-				+ bounceReflectivityRatio[1] + " bounce reflectivity 2: " + bounceReflectivityRatio[2]
-				+ " bounce reflectivity 3: " + bounceReflectivityRatio[3]);
+		if (Config.environmentLogging) {
+			logEnvironment("Bounce reflectivity 0: " + bounceReflectivityRatio[0] + " bounce reflectivity 1: "
+					+ bounceReflectivityRatio[1] + " bounce reflectivity 2: " + bounceReflectivityRatio[2]
+					+ " bounce reflectivity 3: " + bounceReflectivityRatio[3]);
+		}
 
-		sendGain1 *= (float) bounceReflectivityRatio[1];
+		sendGain1 *= bounceReflectivityRatio[1];
 		sendGain2 *= (float) Math.pow(bounceReflectivityRatio[2], 3.0);
 		sendGain3 *= (float) Math.pow(bounceReflectivityRatio[3], 4.0);
 
@@ -541,8 +567,10 @@ public class SoundPhysics {
 		sendGain2 *= (float) Math.pow(sendCutoff2, 0.1);
 		sendGain3 *= (float) Math.pow(sendCutoff3, 0.1);
 
-		logEnvironment("Final environment settings:   " + sendGain0 + ",   " + sendGain1 + ",   " + sendGain2 + ",   "
-				+ sendGain3);
+		if (Config.environmentLogging) {
+			logEnvironment("Final environment settings:   " + sendGain0 + ",   " + sendGain1 + ",   " + sendGain2
+					+ ",   " + sendGain3);
+		}
 
 		if (mc.player.isInWater()) {
 			sendCutoff0 *= 0.4f;
@@ -580,7 +608,7 @@ public class SoundPhysics {
 		EFX10.alFilterf(directFilter0, EFX10.AL_LOWPASS_GAINHF, directCutoff);
 		AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER, directFilter0);
 
-		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, SoundPhysicsCore.Config.airAbsorption);
+		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption);
 	}
 
 	/**
@@ -630,18 +658,15 @@ public class SoundPhysics {
 	}
 
 	protected static void logOcclusion(final String message) {
-		if (SoundPhysicsCore.Config.occlusionLogging)
-			System.out.println(logPrefix + " [OCCLUSION] " + ": " + message);
+		System.out.println(logPrefix + " [OCCLUSION] " + ": " + message);
 	}
 
 	protected static void logEnvironment(final String message) {
-		if (SoundPhysicsCore.Config.environmentLogging)
-			System.out.println(logPrefix + " [ENVIRONMENT] " + ": " + message);
+		System.out.println(logPrefix + " [ENVIRONMENT] " + ": " + message);
 	}
 
 	protected static void logGeneral(final String message) {
-		if (SoundPhysicsCore.Config.debugLogging)
-			System.out.println(logPrefix + ": " + message);
+		System.out.println(logPrefix + ": " + message);
 	}
 
 	protected static void logError(final String errorMessage) {
@@ -650,8 +675,9 @@ public class SoundPhysics {
 
 	protected static boolean checkErrorLog(final String errorMessage) {
 		final int error = AL10.alGetError();
-		if (error == 0)
+		if (error == AL10.AL_NO_ERROR) {
 			return false;
+		}
 
 		String errorName;
 
@@ -676,7 +702,7 @@ public class SoundPhysics {
 			break;
 		}
 
-		System.out.println(logPrefix + " [ERROR]: " + errorMessage + " OpenAL error " + errorName);
+		logError(errorMessage + " OpenAL error " + errorName);
 		return true;
 	}
 

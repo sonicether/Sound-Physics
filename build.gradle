@@ -15,7 +15,7 @@ archivesBaseName = "Sound-Physics"
 
 jar {
 	manifest {
-        attributes 'FMLCorePlugin': 'com.sonicether.soundphysics.SPFMLLoadingPlugin'
+        attributes 'FMLCorePlugin': 'com.sonicether.soundphysics.CoreModLoader'
         attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }

@@ -22,13 +22,13 @@ public class ReverbParams {
 		r.diffusion = 1.0f;
 		r.gain = 0.2f * SoundPhysics.globalReverbMultiplier * 0.85f;
 		r.gainHF = 0.99f;
-		r.decayHFRatio = 0.6f * SoundPhysicsCore.Config.globalReverbBrightness;
+		r.decayHFRatio = 0.6f * Config.globalReverbBrightness;
 		r.reflectionsGain = 2.5f;
 		r.reflectionsDelay = 0.001f;
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.16f * SoundPhysicsCore.Config.rolloffFactor;
+		r.roomRolloffFactor = 0.16f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -40,13 +40,13 @@ public class ReverbParams {
 		r.diffusion = 1.0f;
 		r.gain = 0.3f * SoundPhysics.globalReverbMultiplier * 0.85f;
 		r.gainHF = 0.99f;
-		r.decayHFRatio = 0.7f * SoundPhysicsCore.Config.globalReverbBrightness;
+		r.decayHFRatio = 0.7f * Config.globalReverbBrightness;
 		r.reflectionsGain = 0.2f;
 		r.reflectionsDelay = 0.015f;
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.15f * SoundPhysicsCore.Config.rolloffFactor;
+		r.roomRolloffFactor = 0.15f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -58,13 +58,13 @@ public class ReverbParams {
 		r.diffusion = 1.0f;
 		r.gain = 0.5f * SoundPhysics.globalReverbMultiplier * 0.85f;
 		r.gainHF = 0.99f;
-		r.decayHFRatio = 0.7f * SoundPhysicsCore.Config.globalReverbBrightness;
+		r.decayHFRatio = 0.7f * Config.globalReverbBrightness;
 		r.reflectionsGain = 0.0f;
 		r.reflectionsDelay = 0.021f;
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.13f * SoundPhysicsCore.Config.rolloffFactor;
+		r.roomRolloffFactor = 0.13f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -76,13 +76,13 @@ public class ReverbParams {
 		r.diffusion = 1.0f;
 		r.gain = 0.4f * SoundPhysics.globalReverbMultiplier * 0.85f;
 		r.gainHF = 0.89f;
-		r.decayHFRatio = 0.7f * SoundPhysicsCore.Config.globalReverbBrightness;
+		r.decayHFRatio = 0.7f * Config.globalReverbBrightness;
 		r.reflectionsGain = 0.0f;
 		r.reflectionsDelay = 0.025f;
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.11f * SoundPhysicsCore.Config.rolloffFactor;
+		r.roomRolloffFactor = 0.11f * Config.rolloffFactor;
 
 		return r;
 	}
