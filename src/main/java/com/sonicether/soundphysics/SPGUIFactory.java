@@ -9,7 +9,17 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 public class SPGuiFactory implements IModGuiFactory {
 
 	@Override
-	public void initialize(final Minecraft minecraftInstance) {
+	public void initialize(Minecraft minecraftInstance) {
+	}
+
+	@Override
+	public boolean hasConfigGui() {
+		return true;
+	}
+
+	@Override
+	public GuiScreen createConfigGui(GuiScreen parentScreen) {
+		return new SPGuiConfig(parentScreen);
 	}
 
 	@Override
@@ -22,9 +32,8 @@ public class SPGuiFactory implements IModGuiFactory {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;
 	}
 
