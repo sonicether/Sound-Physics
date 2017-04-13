@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 
-public class SPGUIFactory implements IModGuiFactory {
+public class SPGuiFactory implements IModGuiFactory {
 
 	@Override
 	public void initialize(final Minecraft minecraftInstance) {
@@ -14,7 +14,7 @@ public class SPGUIFactory implements IModGuiFactory {
 
 	@Override
 	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return SPConfigGUI.class;
+		return SPGuiConfig.class;
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class SPGUIFactory implements IModGuiFactory {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
+	public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
 		return null;
 	}
 
