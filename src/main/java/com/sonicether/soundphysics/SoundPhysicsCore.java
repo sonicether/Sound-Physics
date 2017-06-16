@@ -175,7 +175,7 @@ public class SoundPhysicsCore implements IClassTransformer
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "init", "()V"));
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.client.audio.SoundManager$SoundSystemStarterThread", "ccn$a"}, 						//Target Class name
+					new String[]{"net.minecraft.client.audio.SoundManager$SoundSystemStarterThread", "chk$a"}, 						//Target Class name
 					new String[]{"<init>", "<init>"}, 																				//Target method name
 					new String[]{"(Lnet/minecraft/client/audio/SoundManager;)V", "(Lccn;)V"},	//Target method signature
 					Opcodes.INVOKESPECIAL,						//Target opcode
@@ -203,7 +203,7 @@ public class SoundPhysicsCore implements IClassTransformer
 			
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.client.audio.SoundManager", "ccn"}, 	//Target Class name
+					new String[]{"net.minecraft.client.audio.SoundManager", "chk"}, 	//Target Class name
 					new String[]{"playSound", "c"}, 								//Target method name
 					new String[]{"(Lnet/minecraft/client/audio/ISound;)V", "(Lcbz;)V"},	//Target method signature
 					Opcodes.INVOKEVIRTUAL,						//Target opcode
@@ -229,14 +229,14 @@ public class SoundPhysicsCore implements IClassTransformer
 			
 			InsnList toInjectObf = new InsnList();
 			toInjectObf.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInjectObf.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cbz", "a", "()Lkq;"));
-			toInjectObf.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "kq", "toString", "()Ljava/lang/String;"));
+			toInjectObf.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgr", "a", "()Lnd;"));
+			toInjectObf.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nd", "toString", "()Ljava/lang/String;"));
 			toInjectObf.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "setLastSoundName", "(Ljava/lang/String;)V"));
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.client.audio.SoundManager", "ccn"}, 	//Target Class name
+					new String[]{"net.minecraft.client.audio.SoundManager", "chk"}, 	//Target Class name
 					new String[]{"playSound", "c"}, 								//Target method name
-					new String[]{"(Lnet/minecraft/client/audio/ISound;)V", "(Lcbz;)V"},	//Target method signature
+					new String[]{"(Lnet/minecraft/client/audio/ISound;)V", "(Lcgr;)V"},	//Target method signature
 					Opcodes.INVOKEVIRTUAL,						//Target opcode
 					AbstractInsnNode.METHOD_INSN, 				//Target node type
 					new String[]{"setVolume", "setVolume"},		//Target node method invocation name
@@ -259,13 +259,13 @@ public class SoundPhysicsCore implements IClassTransformer
 			toInject.add(new InsnNode(Opcodes.FMUL));
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.client.audio.SoundManager", "ccn"}, 	//Target Class name
+					new String[]{"net.minecraft.client.audio.SoundManager", "chk"}, 	//Target Class name
 					new String[]{"playSound", "c"}, 								//Target method name
-					new String[]{"(Lnet/minecraft/client/audio/ISound;)V", "(Lcbz;)V"},	//Target method signature
+					new String[]{"(Lnet/minecraft/client/audio/ISound;)V", "(Lcgr;)V"},	//Target method signature
 					Opcodes.INVOKESPECIAL,						//Target opcode
 					AbstractInsnNode.METHOD_INSN, 				//Target node type
 					new String[]{"getClampedVolume", "e"},										//Target node method invocation name
-					new String[]{"(Lnet/minecraft/client/audio/ISound;)F", "(Lcbz;)F"}, 	//Target node method invocation  signature
+					new String[]{"(Lnet/minecraft/client/audio/ISound;)F", "(Lcgr;)F"}, 	//Target node method invocation  signature
 					new InsnList[]{toInject}, 									//Instructions to inject
 					false, 										//Insert before the target node?
 					0,			//Nodes to delete before the target node (done before injection)
@@ -347,9 +347,9 @@ public class SoundPhysicsCore implements IClassTransformer
 			toInject.add(new InsnNode(Opcodes.DMUL));
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.server.management.PlayerList", "mt"}, 	//Target Class name
+					new String[]{"net.minecraft.server.management.PlayerList", "pj"}, 	//Target Class name
 					new String[]{"sendToAllNearExcept", "a"}, 								//Target method name
-					new String[]{"(Lnet/minecraft/entity/player/EntityPlayer;DDDDILnet/minecraft/network/Packet;)V", "(Laax;DDDDILfm;)V"},	//Target method signature
+					new String[]{"(Lnet/minecraft/entity/player/EntityPlayer;DDDDILnet/minecraft/network/Packet;)V", "(Laeb;DDDDILht;)V"},	//Target method signature
 					Opcodes.DCMPG,						//Target opcode
 					AbstractInsnNode.INSN, 				//Target node type
 					new String[]{"", ""},										//Target node method invocation name
@@ -380,9 +380,9 @@ public class SoundPhysicsCore implements IClassTransformer
 			toInjectObf.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			
 			arg2 = patchMethodInClass(arg0, arg2, 
-					new String[]{"net.minecraft.entity.Entity", "sm"}, 	//Target Class name
+					new String[]{"net.minecraft.entity.Entity", "ve"}, 	//Target Class name
 					new String[]{"playSound", "a"}, 								//Target method name
-					new String[]{"(Lnet/minecraft/util/SoundEvent;FF)V", "(Lnm;FF)V"},	//Target method signature
+					new String[]{"(Lnet/minecraft/util/SoundEvent;FF)V", "(Lqc;FF)V"},	//Target method signature
 					Opcodes.INVOKEVIRTUAL,						//Target opcode
 					AbstractInsnNode.METHOD_INSN, 				//Target node type
 					new String[]{"getSoundCategory", "bC"},										//Target node method invocation name
