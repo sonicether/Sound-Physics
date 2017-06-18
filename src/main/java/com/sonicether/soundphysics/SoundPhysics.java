@@ -29,7 +29,7 @@ import paulscode.sound.SoundSystemConfig;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.2";
+	public static final String version = "1.0.3";
 	@Instance(modid)
 	public static SoundPhysics instance;
 
@@ -259,9 +259,9 @@ public class SoundPhysics {
 		// dir - 2.0 * dot(normal, dir) * normal
 		final double dot = dir.dotProduct(normal);
 
-		final double x = dir.xCoord - 2.0 * dot * normal.xCoord;
-		final double y = dir.yCoord - 2.0 * dot * normal.yCoord;
-		final double z = dir.zCoord - 2.0 * dot * normal.zCoord;
+		final double x = dir.x - 2.0 * dot * normal.x;
+		final double y = dir.y - 2.0 * dot * normal.y;
+		final double z = dir.z - 2.0 * dot * normal.z;
 
 		return new Vec3d(x, y, z);
 	}
@@ -287,9 +287,9 @@ public class SoundPhysics {
 			// escaping. Offset the ray start position towards the player by the
 			// diagonal half length of a cube
 
-			tempNormX = playerPos.xCoord - soundX;
-			tempNormY = playerPos.yCoord - soundY;
-			tempNormZ = playerPos.zCoord - soundZ;
+			tempNormX = playerPos.x - soundX;
+			tempNormY = playerPos.y - soundY;
+			tempNormZ = playerPos.z - soundZ;
 			final double length = Math.sqrt(tempNormX * tempNormX + tempNormY * tempNormY + tempNormZ * tempNormZ);
 			tempNormX /= length;
 			tempNormY /= length;
@@ -327,10 +327,10 @@ public class SoundPhysics {
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
 		if (Config.debugLogging) {
-			logGeneral("Player pos: " + playerPos.xCoord + ", " + playerPos.yCoord + ", " + playerPos.zCoord
-					+ "      Sound Pos: " + soundPos.xCoord + ", " + soundPos.yCoord + ", " + soundPos.zCoord
-					+ "       To player vector: " + normalToPlayer.xCoord + ", " + normalToPlayer.yCoord + ", "
-					+ normalToPlayer.zCoord);
+			logGeneral("Player pos: " + playerPos.x + ", " + playerPos.y + ", " + playerPos.z
+					+ "      Sound Pos: " + soundPos.x + ", " + soundPos.y + ", " + soundPos.z
+					+ "       To player vector: " + normalToPlayer.x + ", " + normalToPlayer.y + ", "
+					+ normalToPlayer.z);
 		}
 
 		Vec3d rayOrigin = soundPos;
@@ -354,19 +354,19 @@ public class SoundPhysics {
 			}
 
 			if (Config.occlusionLogging) {
-				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.xCoord + ", " + rayHit.hitVec.yCoord
-						+ ", " + rayHit.hitVec.zCoord);
+				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.x + ", " + rayHit.hitVec.y
+						+ ", " + rayHit.hitVec.z);
 			}
 
 			occlusionAccumulation += blockOcclusion;
 
-			rayOrigin = new Vec3d(rayHit.hitVec.xCoord + normalToPlayer.xCoord * 0.1,
-					rayHit.hitVec.yCoord + normalToPlayer.yCoord * 0.1,
-					rayHit.hitVec.zCoord + normalToPlayer.zCoord * 0.1);
+			rayOrigin = new Vec3d(rayHit.hitVec.x + normalToPlayer.x * 0.1,
+					rayHit.hitVec.y + normalToPlayer.y * 0.1,
+					rayHit.hitVec.z + normalToPlayer.z * 0.1);
 
 			if (Config.occlusionLogging) {
 				logOcclusion(
-						"New trace position: " + rayOrigin.xCoord + ", " + rayOrigin.yCoord + ", " + rayOrigin.zCoord);
+						"New trace position: " + rayOrigin.x + ", " + rayOrigin.y + ", " + rayOrigin.z);
 			}
 		}
 
@@ -422,10 +422,10 @@ public class SoundPhysics {
 			final Vec3d rayDir = new Vec3d(Math.cos(latitude) * Math.cos(longitude),
 					Math.cos(latitude) * Math.sin(longitude), Math.sin(latitude));
 
-			final Vec3d rayStart = new Vec3d(soundPos.xCoord, soundPos.yCoord, soundPos.zCoord);
+			final Vec3d rayStart = new Vec3d(soundPos.x, soundPos.y, soundPos.z);
 
-			final Vec3d rayEnd = new Vec3d(rayStart.xCoord + rayDir.xCoord * maxDistance,
-					rayStart.yCoord + rayDir.yCoord * maxDistance, rayStart.zCoord + rayDir.zCoord * maxDistance);
+			final Vec3d rayEnd = new Vec3d(rayStart.x + rayDir.x * maxDistance,
+					rayStart.y + rayDir.y * maxDistance, rayStart.z + rayDir.z * maxDistance);
 
 			final RayTraceResult rayHit = mc.world.rayTraceBlocks(rayStart, rayEnd, true);
 
@@ -444,12 +444,12 @@ public class SoundPhysics {
 				for (int j = 0; j < rayBounces; j++) {
 					final Vec3d newRayDir = reflect(lastRayDir, lastHitNormal);
 					// Vec3d newRayDir = lastHitNormal;
-					final Vec3d newRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01,
-							lastHitPos.yCoord + lastHitNormal.yCoord * 0.01,
-							lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
-					final Vec3d newRayEnd = new Vec3d(newRayStart.xCoord + newRayDir.xCoord * maxDistance,
-							newRayStart.yCoord + newRayDir.yCoord * maxDistance,
-							newRayStart.zCoord + newRayDir.zCoord * maxDistance);
+					final Vec3d newRayStart = new Vec3d(lastHitPos.x + lastHitNormal.x * 0.01,
+							lastHitPos.y + lastHitNormal.y * 0.01,
+							lastHitPos.z + lastHitNormal.z * 0.01);
+					final Vec3d newRayEnd = new Vec3d(newRayStart.x + newRayDir.x * maxDistance,
+							newRayStart.y + newRayDir.y * maxDistance,
+							newRayStart.z + newRayDir.z * maxDistance);
 
 					final RayTraceResult newRayHit = mc.world.rayTraceBlocks(newRayStart, newRayEnd, true);
 
@@ -476,9 +476,9 @@ public class SoundPhysics {
 						// share airspace.
 						if (Config.simplerSharedAirspaceSimulation && j == rayBounces - 1
 								|| !Config.simplerSharedAirspaceSimulation) {
-							final Vec3d finalRayStart = new Vec3d(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01,
-									lastHitPos.yCoord + lastHitNormal.yCoord * 0.01,
-									lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
+							final Vec3d finalRayStart = new Vec3d(lastHitPos.x + lastHitNormal.x * 0.01,
+									lastHitPos.y + lastHitNormal.y * 0.01,
+									lastHitPos.z + lastHitNormal.z * 0.01);
 
 							final RayTraceResult finalRayHit = mc.world.rayTraceBlocks(finalRayStart, playerPos, true);
 
