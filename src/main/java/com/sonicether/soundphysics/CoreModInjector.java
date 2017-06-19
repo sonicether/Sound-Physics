@@ -151,7 +151,7 @@ public class CoreModInjector implements IClassTransformer {
 			final String targetInvocationMethodName, final String targetInvocationMethodSignature,
 			final InsnList instructionsToInject, final boolean insertBefore, final int nodesToDeleteBefore,
 			final int nodesToDeleteAfter, final boolean deleteTargetNode, final int targetNodeOffset) {
-		log("Patching Class: " + className);
+		log("//// Patching Class: " + className);
 
 		// Setup ASM class manipulation stuff
 		final ClassNode classNode = new ClassNode();
@@ -163,11 +163,11 @@ public class CoreModInjector implements IClassTransformer {
 		final Iterator<MethodNode> methods = classNode.methods.iterator();
 		while (methods.hasNext()) {
 			final MethodNode m = methods.next();
-			log("********* Method Name: " + m.name + " Desc: " + m.desc);
+			log("@" + m.name + " " + m.desc);
 
 			// Check if this is the method name and the signature matches
 			if (m.name.equals(targetMethod) && m.desc.equals(targetMethodSignature)) {
-				log("*************************************** Inside target method: " + targetMethod);
+				log("Inside target method: " + targetMethod);
 
 				AbstractInsnNode currentNode = null;
 				AbstractInsnNode targetNode = null;
@@ -250,7 +250,7 @@ public class CoreModInjector implements IClassTransformer {
 					m.instructions.remove(targetNode);
 				}
 
-				log("Patching complete!----------------------------------------------------------------------------------------");
+				log("//// Class finished: " + className);
 
 				break;
 			}
@@ -263,7 +263,7 @@ public class CoreModInjector implements IClassTransformer {
 
 	private void log(final String message) {
 		if (Config.debugLogging) {
-			System.out.println(message);
+			SoundPhysics.log(message);
 		}
 	}
 

@@ -307,7 +307,8 @@ public class SoundPhysics {
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
 		if (mc.player == null || mc.world == null || posY <= 0) {
-			// Menu clicks, posY <= 0 as a condition has to be there: Ingame menu clicks do have a player and world present
+			// Menu clicks, posY <= 0 as a condition has to be there: Ingame
+			// menu clicks do have a player and world present
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
@@ -327,10 +328,9 @@ public class SoundPhysics {
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
 		if (Config.debugLogging) {
-			logGeneral("Player pos: " + playerPos.x + ", " + playerPos.y + ", " + playerPos.z
-					+ "      Sound Pos: " + soundPos.x + ", " + soundPos.y + ", " + soundPos.z
-					+ "       To player vector: " + normalToPlayer.x + ", " + normalToPlayer.y + ", "
-					+ normalToPlayer.z);
+			logGeneral("Player pos: " + playerPos.x + ", " + playerPos.y + ", " + playerPos.z + "      Sound Pos: "
+					+ soundPos.x + ", " + soundPos.y + ", " + soundPos.z + "       To player vector: "
+					+ normalToPlayer.x + ", " + normalToPlayer.y + ", " + normalToPlayer.z);
 		}
 
 		Vec3d rayOrigin = soundPos;
@@ -354,19 +354,17 @@ public class SoundPhysics {
 			}
 
 			if (Config.occlusionLogging) {
-				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.x + ", " + rayHit.hitVec.y
-						+ ", " + rayHit.hitVec.z);
+				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.x + ", " + rayHit.hitVec.y + ", "
+						+ rayHit.hitVec.z);
 			}
 
 			occlusionAccumulation += blockOcclusion;
 
-			rayOrigin = new Vec3d(rayHit.hitVec.x + normalToPlayer.x * 0.1,
-					rayHit.hitVec.y + normalToPlayer.y * 0.1,
+			rayOrigin = new Vec3d(rayHit.hitVec.x + normalToPlayer.x * 0.1, rayHit.hitVec.y + normalToPlayer.y * 0.1,
 					rayHit.hitVec.z + normalToPlayer.z * 0.1);
 
 			if (Config.occlusionLogging) {
-				logOcclusion(
-						"New trace position: " + rayOrigin.x + ", " + rayOrigin.y + ", " + rayOrigin.z);
+				logOcclusion("New trace position: " + rayOrigin.x + ", " + rayOrigin.y + ", " + rayOrigin.z);
 			}
 		}
 
@@ -424,8 +422,8 @@ public class SoundPhysics {
 
 			final Vec3d rayStart = new Vec3d(soundPos.x, soundPos.y, soundPos.z);
 
-			final Vec3d rayEnd = new Vec3d(rayStart.x + rayDir.x * maxDistance,
-					rayStart.y + rayDir.y * maxDistance, rayStart.z + rayDir.z * maxDistance);
+			final Vec3d rayEnd = new Vec3d(rayStart.x + rayDir.x * maxDistance, rayStart.y + rayDir.y * maxDistance,
+					rayStart.z + rayDir.z * maxDistance);
 
 			final RayTraceResult rayHit = mc.world.rayTraceBlocks(rayStart, rayEnd, true);
 
@@ -445,11 +443,9 @@ public class SoundPhysics {
 					final Vec3d newRayDir = reflect(lastRayDir, lastHitNormal);
 					// Vec3d newRayDir = lastHitNormal;
 					final Vec3d newRayStart = new Vec3d(lastHitPos.x + lastHitNormal.x * 0.01,
-							lastHitPos.y + lastHitNormal.y * 0.01,
-							lastHitPos.z + lastHitNormal.z * 0.01);
+							lastHitPos.y + lastHitNormal.y * 0.01, lastHitPos.z + lastHitNormal.z * 0.01);
 					final Vec3d newRayEnd = new Vec3d(newRayStart.x + newRayDir.x * maxDistance,
-							newRayStart.y + newRayDir.y * maxDistance,
-							newRayStart.z + newRayDir.z * maxDistance);
+							newRayStart.y + newRayDir.y * maxDistance, newRayStart.z + newRayDir.z * maxDistance);
 
 					final RayTraceResult newRayHit = mc.world.rayTraceBlocks(newRayStart, newRayEnd, true);
 
@@ -477,8 +473,7 @@ public class SoundPhysics {
 						if (Config.simplerSharedAirspaceSimulation && j == rayBounces - 1
 								|| !Config.simplerSharedAirspaceSimulation) {
 							final Vec3d finalRayStart = new Vec3d(lastHitPos.x + lastHitNormal.x * 0.01,
-									lastHitPos.y + lastHitNormal.y * 0.01,
-									lastHitPos.z + lastHitNormal.z * 0.01);
+									lastHitPos.y + lastHitNormal.y * 0.01, lastHitPos.z + lastHitNormal.z * 0.01);
 
 							final RayTraceResult finalRayHit = mc.world.rayTraceBlocks(finalRayStart, playerPos, true);
 
@@ -653,24 +648,24 @@ public class SoundPhysics {
 		EFX10.alAuxiliaryEffectSloti(auxFXSlot, EFX10.AL_EFFECTSLOT_EFFECT, reverbSlot);
 	}
 
-	protected static void log(final String message) {
-		System.out.println(logPrefix + ": " + message);
+	public static void log(final String message) {
+		System.out.println(logPrefix.concat(" : ").concat(message));
 	}
 
-	protected static void logOcclusion(final String message) {
-		System.out.println(logPrefix + " [OCCLUSION] " + ": " + message);
+	public static void logOcclusion(final String message) {
+		System.out.println(logPrefix.concat(" [OCCLUSION] : ").concat(message));
 	}
 
-	protected static void logEnvironment(final String message) {
-		System.out.println(logPrefix + " [ENVIRONMENT] " + ": " + message);
+	public static void logEnvironment(final String message) {
+		System.out.println(logPrefix.concat(" [ENVIRONMENT] : ").concat(message));
 	}
 
-	protected static void logGeneral(final String message) {
-		System.out.println(logPrefix + ": " + message);
+	public static void logGeneral(final String message) {
+		System.out.println(logPrefix.concat(": ").concat(message));
 	}
 
-	protected static void logError(final String errorMessage) {
-		System.out.println(logPrefix + " [ERROR]: " + errorMessage);
+	public static void logError(final String errorMessage) {
+		System.out.println(logPrefix.concat(" [ERROR]: ").concat(errorMessage));
 	}
 
 	protected static boolean checkErrorLog(final String errorMessage) {
