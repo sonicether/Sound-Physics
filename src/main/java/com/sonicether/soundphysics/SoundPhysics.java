@@ -28,7 +28,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.3";
+	public static final String version = "1.0.4";
 	@Instance(modid)
 	public static SoundPhysics instance;
 
