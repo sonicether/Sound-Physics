@@ -23,7 +23,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import paulscode.sound.SoundSystemConfig;
 
 @Mod(modid = SoundPhysics.modid, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
 public class SoundPhysics {
@@ -71,8 +70,6 @@ public class SoundPhysics {
 
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
-	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
-	public static float globalRolloffFactor = Config.rolloffFactor;
 	public static float globalVolumeMultiplier = 4.0f;
 	public static float globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 	public static double soundDistanceAllowance = Config.soundDistanceAllowance;
@@ -87,7 +84,6 @@ public class SoundPhysics {
 	}
 
 	public static void applyConfigChanges() {
-		globalRolloffFactor = Config.rolloffFactor;
 		globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 		soundDistanceAllowance = Config.soundDistanceAllowance;
 
