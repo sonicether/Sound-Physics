@@ -21,38 +21,38 @@ public class CoreModInjector implements IClassTransformer {
 
 	@Override
 	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
-		if (obfuscated.equals("chk$a")) {
+		if (obfuscated.equals("chm$a")) {
 			// Inside SoundManager.SoundSystemStarterThread
 			InsnList toInject = new InsnList();
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "init",
 					"()V", false));
 
 			// Target method: Constructor
-			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Lchk;)V", Opcodes.INVOKESPECIAL,
+			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Lchm;)V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "<init>", null, toInject, false, 0, 0, false, 0);
 		} else
 
-		if (obfuscated.equals("chk")) {
+		if (obfuscated.equals("chm")) {
 			// Inside SoundManager
 			InsnList toInject = new InsnList();
 
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 7));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundCategory", "(Lqe;)V", false));
+					"setLastSoundCategory", "(Lqg;)V", false));
 
 			// Target method: playSound
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgr;)V", Opcodes.INVOKEVIRTUAL,
+			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "setVolume", null, toInject, false, 0, 0, false, 0);
 
 			toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgr", "a", "()Lnd;", true));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nd", "toString", "()Ljava/lang/String;", false));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgt", "a", "()Lnf;", true));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"setLastSoundName", "(Ljava/lang/String;)V", false));
 
 			// Target method: playSound
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgr;)V", Opcodes.INVOKEVIRTUAL,
+			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "setVolume", null, toInject, false, 0, 0, false, 0);
 
 			toInject = new InsnList();
@@ -60,9 +60,9 @@ public class CoreModInjector implements IClassTransformer {
 					"globalVolumeMultiplier", "F"));
 			toInject.add(new InsnNode(Opcodes.FMUL));
 
-			// Target method: playSound
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgr;)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "e", "(Lcgr;)F", toInject, false, 0, 0, false, 0);
+			// Target method: playSound, target invocation getClampedVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
+					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", toInject, false, 0, 0, false, 0);
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {
@@ -110,7 +110,7 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.METHOD_INSN, "<init>", null, toInject, true, 0, 0, false, 0);
 		} else
 
-		if (obfuscated.equals("pj")) {
+		if (obfuscated.equals("pl")) {
 			// Inside PlayerList
 			InsnList toInject = new InsnList();
 
@@ -121,24 +121,24 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new InsnNode(Opcodes.DMUL));
 
 			// Target method: sendToAllNearExcept
-			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Laeb;DDDDILht;)V", Opcodes.DCMPG,
+			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Laed;DDDDILht;)V", Opcodes.DCMPG,
 					AbstractInsnNode.INSN, "", "", toInject, true, 0, 0, false, 0);
 		} else
 
-		if (obfuscated.equals("ve")) {
+		if (obfuscated.equals("vg")) {
 			// Inside Entity
 			InsnList toInject = new InsnList();
 
 			// Offset entity sound by their eye height
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"calculateEntitySoundOffset", "(Lve;Lqc;)D", false));
+					"calculateEntitySoundOffset", "(Lvg;Lqe;)D", false));
 			toInject.add(new InsnNode(Opcodes.DADD));
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
 
 			// Target method: playSound
 			// Inside target method, target node: Entity/getSoundCategory
-			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Lqc;FF)V", Opcodes.INVOKEVIRTUAL,
+			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Lqe;FF)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "bK", null, toInject, true, 0, 0, false, -3);
 		}
 
