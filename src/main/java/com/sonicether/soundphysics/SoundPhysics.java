@@ -20,33 +20,25 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import paulscode.sound.SoundSystemConfig;
 
-@Mod(modid = SoundPhysics.modid, clientSideOnly = true, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
+@Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.4";
-	@Instance(modid)
-	public static SoundPhysics instance;
-
-	public final Config config;
-
-	public SoundPhysics() {
-		this.config = new Config();
-	}
+	public static final String mcVersion = "1.12.1";
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
-		this.config.preInit(event);
+		Config.instance.preInit(event);
 	}
 
 	@Mod.EventHandler
 	public void init(final FMLInitializationEvent event) {
-		this.config.init(event);
+		Config.instance.init(event);
 	}
 
 	private static final String logPrefix = "[SOUND PHYSICS]";

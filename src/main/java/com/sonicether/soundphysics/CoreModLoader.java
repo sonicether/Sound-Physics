@@ -5,7 +5,7 @@ import java.util.Map;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
-@MCVersion(value = "1.12.1")
+@MCVersion(value = SoundPhysics.mcVersion)
 public class CoreModLoader implements IFMLLoadingPlugin {
 
 	@Override

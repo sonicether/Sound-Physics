@@ -14,33 +14,34 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Config {
 
+	public static final Config instance;
 	private Configuration forgeConfig;
 
 	// general
-	public static float rolloffFactor = 1.0f;
-	public static float globalReverbGain = 1.0f;
-	public static float globalReverbBrightness = 1.0f;
-	public static double soundDistanceAllowance = 4.0f;
-	public static float globalBlockAbsorption = 1.0f;
-	public static float globalBlockReflectance = 1.0f;
-	public static float airAbsorption = 1.0f;
-	public static float underwaterFilter = 0.8f;
+	public static float rolloffFactor;
+	public static float globalReverbGain;
+	public static float globalReverbBrightness;
+	public static float soundDistanceAllowance;
+	public static float globalBlockAbsorption;
+	public static float globalBlockReflectance;
+	public static float airAbsorption;
+	public static float underwaterFilter;
 
 	// performance
-	public static boolean skipRainOcclusionTracing = true;
-	public static int environmentEvaluationRays = 32;
-	public static boolean simplerSharedAirspaceSimulation = false;
+	public static boolean skipRainOcclusionTracing;
+	public static int environmentEvaluationRays;
+	public static boolean simplerSharedAirspaceSimulation;
 
 	// block properties
-	public static float stoneReflectivity = 1.0f;
-	public static float woodReflectivity = 0.4f;
-	public static float groundReflectivity = 0.3f;
-	public static float plantReflectivity = 0.5f;
-	public static float metalReflectivity = 1.0f;
-	public static float glassReflectivity = 0.5f;
-	public static float clothReflectivity = 0.05f;
-	public static float sandReflectivity = 0.2f;
-	public static float snowReflectivity = 0.2f;
+	public static float stoneReflectivity;
+	public static float woodReflectivity;
+	public static float groundReflectivity;
+	public static float plantReflectivity;
+	public static float metalReflectivity;
+	public static float glassReflectivity;
+	public static float clothReflectivity;
+	public static float sandReflectivity;
+	public static float snowReflectivity;
 
 	// misc
 	public static boolean debugLogging = false;
@@ -52,6 +53,13 @@ public class Config {
 	private static final String categoryPerformance = "Performance";
 	private static final String categoryMaterialProperties = "Material properties";
 	private static final String categoryMisc = "Misc";
+
+	static {
+		instance = new Config();
+	}
+
+	private Config() {
+	}
 
 	public void preInit(final FMLPreInitializationEvent event) {
 		this.forgeConfig = new Configuration(event.getSuggestedConfigurationFile());
