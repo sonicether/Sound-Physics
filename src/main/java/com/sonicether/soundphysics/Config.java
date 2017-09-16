@@ -17,6 +17,7 @@ public class Config {
 	private Configuration forgeConfig;
 
 	// general
+	public static float rolloffFactor = 1.0f;
 	public static float globalReverbGain = 1.0f;
 	public static float globalReverbBrightness = 1.0f;
 	public static double soundDistanceAllowance = 4.0f;
@@ -81,6 +82,8 @@ public class Config {
 
 	private void syncConfig() {
 		// General
+		rolloffFactor = this.forgeConfig.getFloat("Attenuation Factor", categoryGeneral, 1.0f, 0.2f, 1.0f,
+				"Affects how quiet a sound gets based on distance. Lower values mean distant sounds are louder. 1.0 is the physically correct value.");
 		globalReverbGain = this.forgeConfig.getFloat("Global Reverb Gain", categoryGeneral, 1.0f, 0.1f, 2.0f,
 				"The global volume of simulated reverberations.");
 		globalReverbBrightness = this.forgeConfig.getFloat("Global Reverb Brightness", categoryGeneral, 1.0f, 0.1f,

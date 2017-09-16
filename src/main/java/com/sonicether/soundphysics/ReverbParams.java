@@ -28,7 +28,7 @@ public class ReverbParams {
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.16f;
+		r.roomRolloffFactor = 0.16f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -46,7 +46,7 @@ public class ReverbParams {
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.15f;
+		r.roomRolloffFactor = 0.15f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -64,7 +64,7 @@ public class ReverbParams {
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.13f;
+		r.roomRolloffFactor = 0.13f * Config.rolloffFactor;
 
 		return r;
 	}
@@ -82,7 +82,7 @@ public class ReverbParams {
 		r.lateReverbGain = 1.26f;
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
-		r.roomRolloffFactor = 0.11f;
+		r.roomRolloffFactor = 0.11f * Config.rolloffFactor;
 
 		return r;
 	}

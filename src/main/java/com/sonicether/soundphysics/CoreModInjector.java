@@ -101,13 +101,14 @@ public class CoreModInjector implements IClassTransformer {
 			InsnList toInject = new InsnList();
 
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"globalVolumeMultiplier", "F"));
-			toInject.add(new InsnNode(Opcodes.FMUL));
+					"attenuationModel", "I"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"globalRolloffFactor", "F"));
 
 			// Target method: newSource
 			bytes = patchMethodInClass(obfuscated, bytes, "newSource",
 					"(ZLjava/lang/String;Ljava/net/URL;Ljava/lang/String;ZFFFIF)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "<init>", null, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "<init>", null, toInject, true, 2, 0, false, 0);
 		} else
 
 		if (obfuscated.equals("pl")) {
