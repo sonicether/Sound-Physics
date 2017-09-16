@@ -73,7 +73,6 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void init() {
-		log("Initializing Sound Physics...");
 		setupEFX();
 		mc = Minecraft.getMinecraft();
 	}
@@ -175,25 +174,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
-		if (Config.debugLogging) {
-			logGeneral("onPlaySound, Source ID: " + sourceID + " " + posX + ", " + posY + ", " + posZ
-					+ "    Sound category: " + lastSoundCategory.toString() + "    Sound name: " + lastSoundName);
-		}
-
-		long startTime = 0;
-		long endTime = 0;
-
-		if (Config.performanceLogging) {
-			startTime = System.nanoTime();
-		}
-
 		evaluateEnvironment(sourceID, posX, posY, posZ);
-
-		if (Config.performanceLogging) {
-			endTime = System.nanoTime();
-			log("Total calculation time for sound " + lastSoundName + ": "
-					+ (double) (endTime - startTime) / (double) 1000000 + " milliseconds");
-		}
 	}
 
 	/**
@@ -319,12 +300,6 @@ public class SoundPhysics {
 		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, lastSoundName, lastSoundCategory);
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
-		if (Config.debugLogging) {
-			logGeneral("Player pos: " + playerPos.x + ", " + playerPos.y + ", " + playerPos.z + "      Sound Pos: "
-					+ soundPos.x + ", " + soundPos.y + ", " + soundPos.z + "       To player vector: "
-					+ normalToPlayer.x + ", " + normalToPlayer.y + ", " + normalToPlayer.z);
-		}
-
 		Vec3d rayOrigin = soundPos;
 
 		float occlusionAccumulation = 0.0f;
@@ -345,27 +320,14 @@ public class SoundPhysics {
 				blockOcclusion *= 0.15f;
 			}
 
-			if (Config.occlusionLogging) {
-				logOcclusion(blockHit.getUnlocalizedName() + "    " + rayHit.hitVec.x + ", " + rayHit.hitVec.y + ", "
-						+ rayHit.hitVec.z);
-			}
-
 			occlusionAccumulation += blockOcclusion;
 
 			rayOrigin = new Vec3d(rayHit.hitVec.x + normalToPlayer.x * 0.1, rayHit.hitVec.y + normalToPlayer.y * 0.1,
 					rayHit.hitVec.z + normalToPlayer.z * 0.1);
-
-			if (Config.occlusionLogging) {
-				logOcclusion("New trace position: " + rayOrigin.x + ", " + rayOrigin.y + ", " + rayOrigin.z);
-			}
 		}
 
 		directCutoff = (float) Math.exp(-occlusionAccumulation * absorptionCoeff);
 		float directGain = (float) Math.pow(directCutoff, 0.1);
-
-		if (Config.occlusionLogging) {
-			logOcclusion("direct cutoff: " + directCutoff + "  direct gain:" + directGain);
-		}
 
 		// Calculate reverb parameters for this sound
 		float sendGain0 = 0.0f;
@@ -534,12 +496,6 @@ public class SoundPhysics {
 
 		directGain = (float) Math.pow(directCutoff, 0.1);
 
-		if (Config.environmentLogging) {
-			logEnvironment("Bounce reflectivity 0: " + bounceReflectivityRatio[0] + " bounce reflectivity 1: "
-					+ bounceReflectivityRatio[1] + " bounce reflectivity 2: " + bounceReflectivityRatio[2]
-					+ " bounce reflectivity 3: " + bounceReflectivityRatio[3]);
-		}
-
 		sendGain1 *= bounceReflectivityRatio[1];
 		sendGain2 *= (float) Math.pow(bounceReflectivityRatio[2], 3.0);
 		sendGain3 *= (float) Math.pow(bounceReflectivityRatio[3], 4.0);
@@ -553,11 +509,6 @@ public class SoundPhysics {
 		sendGain1 *= (float) Math.pow(sendCutoff1, 0.1);
 		sendGain2 *= (float) Math.pow(sendCutoff2, 0.1);
 		sendGain3 *= (float) Math.pow(sendCutoff3, 0.1);
-
-		if (Config.environmentLogging) {
-			logEnvironment("Final environment settings:   " + sendGain0 + ",   " + sendGain1 + ",   " + sendGain2
-					+ ",   " + sendGain3);
-		}
 
 		if (mc.player.isInWater()) {
 			sendCutoff0 *= 0.4f;
@@ -642,18 +593,6 @@ public class SoundPhysics {
 
 	public static void log(final String message) {
 		System.out.println(logPrefix.concat(" : ").concat(message));
-	}
-
-	public static void logOcclusion(final String message) {
-		System.out.println(logPrefix.concat(" [OCCLUSION] : ").concat(message));
-	}
-
-	public static void logEnvironment(final String message) {
-		System.out.println(logPrefix.concat(" [ENVIRONMENT] : ").concat(message));
-	}
-
-	public static void logGeneral(final String message) {
-		System.out.println(logPrefix.concat(": ").concat(message));
 	}
 
 	public static void logError(final String errorMessage) {

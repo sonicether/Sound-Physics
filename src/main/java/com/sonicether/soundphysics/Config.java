@@ -43,16 +43,9 @@ public class Config {
 	public static float sandReflectivity;
 	public static float snowReflectivity;
 
-	// misc
-	public static boolean debugLogging = false;
-	public static boolean occlusionLogging = false;
-	public static boolean environmentLogging = false;
-	public static boolean performanceLogging = false;
-
 	private static final String categoryGeneral = "General";
 	private static final String categoryPerformance = "Performance";
 	private static final String categoryMaterialProperties = "Material properties";
-	private static final String categoryMisc = "Misc";
 
 	static {
 		instance = new Config();
@@ -83,7 +76,6 @@ public class Config {
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryGeneral)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryPerformance)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMaterialProperties)));
-		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMisc)));
 
 		return list;
 	}
@@ -139,15 +131,6 @@ public class Config {
 				"Sound reflectivity for sand blocks.");
 		snowReflectivity = this.forgeConfig.getFloat("Snow Reflectivity", categoryMaterialProperties, 0.2f, 0.0f, 1.0f,
 				"Sound reflectivity for snow blocks.");
-
-		// misc
-		debugLogging = this.forgeConfig.getBoolean("Debug Logging", categoryMisc, false, "General debug logging");
-		occlusionLogging = this.forgeConfig.getBoolean("Occlusion Logging", categoryMisc, false,
-				"Occlusion tracing information logging");
-		environmentLogging = this.forgeConfig.getBoolean("Environment Logging", categoryMisc, false,
-				"Environment evaluation information logging");
-		performanceLogging = this.forgeConfig.getBoolean("Performance Logging", categoryMisc, false,
-				"Performance information logging");
 
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();

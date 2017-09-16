@@ -151,27 +151,19 @@ public class CoreModInjector implements IClassTransformer {
 			final String targetInvocationMethodName, final String targetInvocationMethodSignature,
 			final InsnList instructionsToInject, final boolean insertBefore, final int nodesToDeleteBefore,
 			final int nodesToDeleteAfter, final boolean deleteTargetNode, final int targetNodeOffset) {
-		log("//// Patching Class: " + className);
 
-		// Setup ASM class manipulation stuff
 		final ClassNode classNode = new ClassNode();
 		final ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
-
-		// Now we loop over all of the methods declared inside the class until
-		// we get to the target method name
 		final Iterator<MethodNode> methodIterator = classNode.methods.iterator();
+		
 		while (methodIterator.hasNext()) {
 			final MethodNode m = methodIterator.next();
-			log("@" + m.name + " " + m.desc);
 
-			// Check if this is the method name and the signature matches
 			if (m.name.equals(targetMethod) && m.desc.equals(targetMethodSignature)) {
-				log("Inside target method: " + targetMethod);
 
 				AbstractInsnNode targetNode = null;
 
-				// Loop over the instruction set
 				final ListIterator<AbstractInsnNode> nodeIterator = m.instructions.iterator();
 				while (nodeIterator.hasNext()) {
 					AbstractInsnNode currentNode = nodeIterator.next();
@@ -184,8 +176,6 @@ public class CoreModInjector implements IClassTransformer {
 								if (method.name.equals(targetInvocationMethodName)) {
 									if (method.desc.equals(targetInvocationMethodSignature)
 											|| targetInvocationMethodSignature == null) {
-										log("Found target method invocation for injection: "
-												+ targetInvocationMethodName);
 										targetNode = currentNode;
 										// Due to collisions, do not put break
 										// statements here!
@@ -195,7 +185,6 @@ public class CoreModInjector implements IClassTransformer {
 							}
 						} else {
 							if (currentNode.getType() == targetNodeType) {
-								log("Found target node for injection: " + targetNodeOpcode);
 								targetNode = currentNode;
 								// Due to collisions, do not put break
 								// statements here!
@@ -224,13 +213,11 @@ public class CoreModInjector implements IClassTransformer {
 				// If we've found the target, inject the instructions!
 				for (int i = 0; i < nodesToDeleteBefore; i++) {
 					final AbstractInsnNode previousNode = targetNode.getPrevious();
-					log("Removing Node " + previousNode.getOpcode());
 					m.instructions.remove(previousNode);
 				}
 
 				for (int i = 0; i < nodesToDeleteAfter; i++) {
 					final AbstractInsnNode nextNode = targetNode.getNext();
-					log("Removing Node " + nextNode.getOpcode());
 					m.instructions.remove(nextNode);
 				}
 
@@ -248,17 +235,9 @@ public class CoreModInjector implements IClassTransformer {
 			}
 		}
 
-		log("//// Class finished: " + className);
-
 		final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classNode.accept(writer);
 		return writer.toByteArray();
-	}
-
-	private void log(final String message) {
-		if (Config.debugLogging) {
-			SoundPhysics.log(message);
-		}
 	}
 
 }
