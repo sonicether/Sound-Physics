@@ -113,19 +113,19 @@ public class Config {
 				"If true, enables a simpler technique for determining when the player and a sound source share airspace. Might sometimes miss recognizing shared airspace, but it's faster to calculate.");
 
 		// material properties
-		stoneReflectivity = this.forgeConfig.getFloat("Stone Reflectivity", categoryMaterialProperties, 1.0f, 0.0f,
+		stoneReflectivity = this.forgeConfig.getFloat("Stone Reflectivity", categoryMaterialProperties, 0.95f, 0.0f,
 				1.0f, "Sound reflectivity for stone blocks.");
-		woodReflectivity = this.forgeConfig.getFloat("Wood Reflectivity", categoryMaterialProperties, 0.4f, 0.0f, 1.0f,
+		woodReflectivity = this.forgeConfig.getFloat("Wood Reflectivity", categoryMaterialProperties, 0.7f, 0.0f, 1.0f,
 				"Sound reflectivity for wooden blocks.");
 		groundReflectivity = this.forgeConfig.getFloat("Ground Reflectivity", categoryMaterialProperties, 0.3f, 0.0f,
 				1.0f, "Sound reflectivity for ground blocks (dirt, gravel, etc).");
-		plantReflectivity = this.forgeConfig.getFloat("Foliage Reflectivity", categoryMaterialProperties, 0.5f, 0.0f,
+		plantReflectivity = this.forgeConfig.getFloat("Foliage Reflectivity", categoryMaterialProperties, 0.2f, 0.0f,
 				1.0f, "Sound reflectivity for foliage blocks (leaves, grass, etc.).");
-		metalReflectivity = this.forgeConfig.getFloat("Metal Reflectivity", categoryMaterialProperties, 1.0f, 0.0f,
+		metalReflectivity = this.forgeConfig.getFloat("Metal Reflectivity", categoryMaterialProperties, 0.97f, 0.0f,
 				1.0f, "Sound reflectivity for metal blocks.");
 		glassReflectivity = this.forgeConfig.getFloat("Glass Reflectivity", categoryMaterialProperties, 0.5f, 0.0f,
 				1.0f, "Sound reflectivity for glass blocks.");
-		clothReflectivity = this.forgeConfig.getFloat("Cloth Reflectivity", categoryMaterialProperties, 0.05f, 0.0f,
+		clothReflectivity = this.forgeConfig.getFloat("Cloth Reflectivity", categoryMaterialProperties, 0.25f, 0.0f,
 				1.0f, "Sound reflectivity for cloth blocks (carpet, wool, etc).");
 		sandReflectivity = this.forgeConfig.getFloat("Sand Reflectivity", categoryMaterialProperties, 0.2f, 0.0f, 1.0f,
 				"Sound reflectivity for sand blocks.");

@@ -229,12 +229,11 @@ public class SoundPhysics {
 	}
 
 	private static Vec3d reflect(final Vec3d dir, final Vec3d normal) {
-		// dir - 2.0 * dot(normal, dir) * normal
-		final double dot = dir.dotProduct(normal);
+		final double dot2 = dir.dotProduct(normal) * 2;
 
-		final double x = dir.x - 2.0 * dot * normal.x;
-		final double y = dir.y - 2.0 * dot * normal.y;
-		final double z = dir.z - 2.0 * dot * normal.z;
+		final double x = dir.x - dot2 * normal.x;
+		final double y = dir.y - dot2 * normal.y;
+		final double z = dir.z - dot2 * normal.z;
 
 		return new Vec3d(x, y, z);
 	}
@@ -254,7 +253,7 @@ public class SoundPhysics {
 			offsetY = 0.1;
 		}
 
-		if (category == SoundCategory.BLOCKS || category == SoundCategory.RECORDS || name.matches(".*block.*")) {
+		if (category == SoundCategory.BLOCKS || name.matches(".*block.*")) {
 			// The ray will probably hit the block that it's emitting from
 			// before
 			// escaping. Offset the ray start position towards the player by the
@@ -279,8 +278,9 @@ public class SoundPhysics {
 
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
-		if (mc.player == null || mc.world == null || posY <= 0) {
-			// Menu clicks, posY <= 0 as a condition has to be there: Ingame
+		if (mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS
+				| lastSoundCategory == SoundCategory.MUSIC) {
+			// posY <= 0 as a condition has to be there: Ingame
 			// menu clicks do have a player and world present
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
