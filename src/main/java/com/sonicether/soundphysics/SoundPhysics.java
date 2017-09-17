@@ -1,5 +1,7 @@
 package com.sonicether.soundphysics;
 
+import java.util.regex.Pattern;
+
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC10;
@@ -30,6 +32,10 @@ public class SoundPhysics {
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.4";
 	public static final String mcVersion = "1.12.1";
+
+	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
+	private static final Pattern stepPattern = Pattern.compile(".*step.*");
+	private static final Pattern blockPattern = Pattern.compile(".*block.*");
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
@@ -90,7 +96,6 @@ public class SoundPhysics {
 			setReverbParams(ReverbParams.getReverb2(), auxFXSlot2, reverb2);
 			setReverbParams(ReverbParams.getReverb3(), auxFXSlot3, reverb3);
 		}
-
 	}
 
 	private static void setupEFX() {
@@ -181,7 +186,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
-		if (sound.getSoundName().getResourcePath().matches(".*step.*")) {
+		if (stepPattern.matcher(sound.getSoundName().getResourcePath()).matches()) {
 			return 0;
 		}
 
@@ -249,11 +254,11 @@ public class SoundPhysics {
 		double tempNormY = 0;
 		double tempNormZ = 0;
 
-		if (soundY % 1.0 < 0.001 || name.matches(".*step.*")) {
+		if (soundY % 1.0 < 0.001 || stepPattern.matcher(name).matches()) {
 			offsetY = 0.1;
 		}
 
-		if (category == SoundCategory.BLOCKS || name.matches(".*block.*")) {
+		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches()) {
 			// The ray will probably hit the block that it's emitting from
 			// before
 			// escaping. Offset the ray start position towards the player by the
@@ -286,7 +291,7 @@ public class SoundPhysics {
 			return;
 		}
 
-		final boolean isRain = lastSoundName.matches(".*rain.*");
+		final boolean isRain = rainPattern.matcher(lastSoundName).matches();
 
 		if (Config.skipRainOcclusionTracing && isRain) {
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
