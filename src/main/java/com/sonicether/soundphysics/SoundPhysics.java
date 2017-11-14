@@ -31,7 +31,7 @@ public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.4";
-	public static final String mcVersion = "1.12.1";
+	public static final String mcVersion = "1.12.2";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
 	private static final Pattern stepPattern = Pattern.compile(".*step.*");
